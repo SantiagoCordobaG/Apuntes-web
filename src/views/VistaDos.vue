@@ -3,6 +3,7 @@
     <HelloWorldVue :mensajes="mensajes" />
   </template>
   
+  
   <script setup>
   import HelloWorldVue from "@/components/HelloWorld.vue";
   
