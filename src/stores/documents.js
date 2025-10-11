@@ -5,20 +5,6 @@ export const useDocumentsStore = defineStore('documents', () => {
   // Estado
   const documents = ref([
     {
-      id: 1,
-      title: 'Apuntes de Matemáticas Avanzadas',
-      description: 'Cálculo diferencial e integral',
-      fileName: 'matematicas_avanzadas.pdf',
-      fileType: 'pdf',
-      uploadDate: '2024-01-15',
-      author: 'Prof. García',
-      tags: ['matemáticas', 'cálculo', 'universidad'],
-      rating: 4.5,
-      ratingCount: 23,
-      fileSize: '2.3 MB',
-      downloadCount: 156
-    },
-    {
       id: 2,
       title: 'Historia del Arte Moderno',
       description: 'Movimientos artísticos del siglo XX',
