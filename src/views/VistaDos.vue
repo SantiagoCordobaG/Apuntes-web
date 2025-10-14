@@ -7,7 +7,7 @@
   import HelloWorldVue from "@/components/HelloWorld.vue";
   
   const mensajes = [
-    "Hola, soy la vista Dos",
+    "Hola, soy la vista Dos, y soy santiago",
     "Este es un Ejemplo de mensajes"
   ];
   </script>
