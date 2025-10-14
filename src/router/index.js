@@ -3,6 +3,9 @@ import MainLayout from "@/layouts/MainLayout.vue";
 import VistaUser from "@/views/VistaUser.vue";
 import UploadView from "@/views/UploadView.vue";
 import SearchView from "@/views/SearchView.vue";
+import PerfilView from "@/views/PerfilView.vue";
+import MisDocumentosView from "@/views/MisDocumentosView.vue";
+import LoginView from "@/views/LoginView.vue";
 
 const routes = [
   {
@@ -25,12 +28,27 @@ const routes = [
         name: "Search",
         component: SearchView,
       },
+      {
+        path: "perfil",
+        name: "Perfil",
+        component: PerfilView,
+      },
+      {
+        path: "mis-documentos",
+        name: "MisDocumentos",
+        component: MisDocumentosView,
+      },
+      {
+        path: "login",
+        name: "Login",
+        component: LoginView,
+      },
     ],
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
 });
 

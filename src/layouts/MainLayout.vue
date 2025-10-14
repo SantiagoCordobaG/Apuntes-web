@@ -3,11 +3,13 @@
     <!-- Header -->
     <el-header class="app-header">
       <div class="header-content">
+        <!-- Logo -->
         <div class="logo-section">
           <el-icon class="logo-icon"><Document /></el-icon>
           <h1 class="app-title">Repositorio de Apuntes</h1>
         </div>
-        
+
+        <!-- Menú de navegación principal -->
         <el-menu
           :default-active="activeIndex"
           class="nav-menu"
@@ -28,6 +30,7 @@
           </el-menu-item>
         </el-menu>
 
+        <!-- Usuario -->
         <div class="user-section">
           <el-dropdown>
             <el-button type="text" class="user-button">
@@ -37,9 +40,15 @@
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>Mi Perfil</el-dropdown-item>
-                <el-dropdown-item>Mis Documentos</el-dropdown-item>
-                <el-dropdown-item divided>Cerrar Sesión</el-dropdown-item>
+                <el-dropdown-item @click="goTo('/perfil')">
+                  Mi Perfil
+                </el-dropdown-item>
+                <el-dropdown-item @click="goTo('/mis-documentos')">
+                  Mis Documentos
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="logout">
+                  Cerrar Sesión
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -47,7 +56,7 @@
       </div>
     </el-header>
 
-    <!-- Main Content -->
+    <!-- Contenido principal -->
     <el-main class="app-main">
       <router-view />
     </el-main>
@@ -55,7 +64,7 @@
     <!-- Footer -->
     <el-footer class="app-footer">
       <div class="footer-content">
-        <p>&copy; 2024 Repositorio de Apuntes. Todos los derechos reservados.</p>
+        <p>&copy; 2025 Repositorio de Apuntes. Todos los derechos reservados.</p>
         <div class="footer-links">
           <el-link type="primary">Términos de Uso</el-link>
           <el-link type="primary">Política de Privacidad</el-link>
@@ -69,14 +78,15 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { 
-  Document, 
-  House, 
-  Upload, 
-  Search, 
-  User, 
-  ArrowDown 
+import {
+  Document,
+  House,
+  Upload,
+  Search,
+  User,
+  ArrowDown
 } from '@element-plus/icons-vue';
+import { ElMessageBox, ElMessage } from 'element-plus';
 
 const router = useRouter();
 const route = useRoute();
@@ -85,6 +95,31 @@ const activeIndex = computed(() => route.path);
 
 const handleSelect = (key) => {
   router.push(key);
+};
+
+// Navegación a rutas del usuario
+const goTo = (path) => {
+  router.push(path);
+};
+
+// Cerrar sesión (ejemplo simple)
+const logout = () => {
+  ElMessageBox.confirm(
+    '¿Estás seguro de que quieres cerrar sesión?',
+    'Confirmar cierre de sesión',
+    {
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      ElMessage.success('Sesión cerrada correctamente');
+      router.push('/login');
+    })
+    .catch(() => {
+      ElMessage.info('Cierre de sesión cancelado');
+    });
 };
 </script>
 
@@ -196,11 +231,11 @@ const handleSelect = (key) => {
     gap: 10px;
     padding: 10px;
   }
-  
+
   .nav-menu {
     width: 100%;
   }
-  
+
   .footer-content {
     flex-direction: column;
     gap: 10px;
