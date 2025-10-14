@@ -1,124 +1,10 @@
 <template>
-  <div class="dashboard">
-    <!-- Estadísticas principales -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <el-icon class="stat-icon"><Document /></el-icon>
-            <div class="stat-info">
-              <h3>{{ statistics.totalDocuments }}</h3>
-              <p>Documentos</p>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <el-icon class="stat-icon"><Download /></el-icon>
-            <div class="stat-info">
-              <h3>{{ statistics.totalDownloads }}</h3>
-              <p>Descargas</p>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <el-icon class="stat-icon"><Star /></el-icon>
-            <div class="stat-info">
-              <h3>{{ statistics.averageRating }}</h3>
-              <p>Valoración Promedio</p>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <el-icon class="stat-icon"><Collection /></el-icon>
-            <div class="stat-info">
-              <h3>{{ statistics.totalTags }}</h3>
-              <p>Etiquetas</p>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- Barra de búsqueda rápida -->
-    <el-card class="search-card">
-      <div class="search-section">
-        <el-input
-          v-model="searchQuery"
-          placeholder="Buscar documentos..."
-          class="search-input"
-          @input="handleSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" @click="goToAdvancedSearch">
-          <el-icon><Filter /></el-icon>
-          Búsqueda Avanzada
-        </el-button>
-      </div>
-    </el-card>
-
-    <!-- Filtros rápidos -->
-    <el-card class="filters-card">
-      <div class="filters-section">
-        <div class="filter-group">
-          <label>Ordenar por:</label>
-          <el-select v-model="sortBy" @change="handleSortChange" style="width: 150px">
-            <el-option label="Fecha" value="uploadDate" />
-            <el-option label="Título" value="title" />
-            <el-option label="Valoración" value="rating" />
-            <el-option label="Descargas" value="downloadCount" />
-          </el-select>
-        </div>
-        
-        <div class="filter-group">
-          <label>Tipo de archivo:</label>
-          <el-select v-model="fileTypeFilter" @change="handleFileTypeChange" style="width: 120px">
-            <el-option label="Todos" value="all" />
-            <el-option label="PDF" value="pdf" />
-            <el-option label="Word" value="docx" />
-          </el-select>
-        </div>
-
-        <div class="filter-group">
-          <label>Etiquetas:</label>
-          <el-select
-            v-model="selectedTags"
-            multiple
-            placeholder="Seleccionar etiquetas"
-            style="width: 200px"
-            @change="handleTagsChange"
-          >
-            <el-option
-              v-for="tag in allTags"
-              :key="tag"
-              :label="tag"
-              :value="tag"
-            />
-          </el-select>
-        </div>
-      </div>
-    </el-card>
-
+  <div class="documents-section">
     <!-- Lista de documentos -->
     <el-card class="documents-card">
       <template #header>
         <div class="card-header">
           <h2>Documentos Disponibles</h2>
-          <el-button type="primary" @click="goToUpload">
-            <el-icon><Upload /></el-icon>
-            Subir Documento
-          </el-button>
         </div>
       </template>
 
@@ -186,98 +72,29 @@
               <el-icon><View /></el-icon>
               Ver Detalles
             </el-button>
-            <el-button @click="rateDocument(document)">
-              <el-icon><Star /></el-icon>
-              Valorar
-            </el-button>
           </div>
         </el-card>
       </div>
     </el-card>
-
-    <!-- Dialog de valoración -->
-    <RatingDialog
-      v-model="ratingDialogVisible"
-      :document="selectedDocument"
-      @rated="handleRatingComplete"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 import { useDocumentsStore } from '@/stores/documents';
 import { ElMessage } from 'element-plus';
-import RatingDialog from '@/components/RatingDialog.vue';
-import {
-  Document,
-  Download,
-  Star,
-  Collection,
-  Search,
-  Filter,
-  Upload,
-  View
-} from '@element-plus/icons-vue';
+import { Document, Download, View } from '@element-plus/icons-vue';
 
-const router = useRouter();
 const documentsStore = useDocumentsStore();
-
-// Estado reactivo
-const searchQuery = ref('');
-const sortBy = ref('uploadDate');
-const fileTypeFilter = ref('all');
-const selectedTags = ref([]);
-const ratingDialogVisible = ref(false);
-const selectedDocument = ref(null);
-
-// Getters del store
-const { filteredDocuments, allTags, statistics } = documentsStore;
-
-// Métodos
-const handleSearch = () => {
-  documentsStore.setSearchQuery(searchQuery.value);
-};
-
-const handleSortChange = () => {
-  documentsStore.setSortBy(sortBy.value);
-};
-
-const handleFileTypeChange = () => {
-  documentsStore.setFileTypeFilter(fileTypeFilter.value);
-};
-
-const handleTagsChange = () => {
-  documentsStore.setSelectedTags(selectedTags.value);
-};
-
-const goToAdvancedSearch = () => {
-  router.push('/search');
-};
-
-const goToUpload = () => {
-  router.push('/upload');
-};
+const { filteredDocuments } = documentsStore;
 
 const downloadDocument = (document) => {
   documentsStore.incrementDownloadCount(document.id);
   ElMessage.success(`Descargando ${document.title}`);
-  // Aquí iría la lógica real de descarga
 };
 
 const viewDocument = (document) => {
   ElMessage.info(`Viendo detalles de ${document.title}`);
-  // Aquí iría la navegación a la vista de detalles
-};
-
-const rateDocument = (document) => {
-  selectedDocument.value = document;
-  ratingDialogVisible.value = true;
-};
-
-const handleRatingComplete = () => {
-  ElMessage.success('Valoración enviada exitosamente');
 };
 
 const formatDate = (dateString) => {
@@ -286,88 +103,19 @@ const formatDate = (dateString) => {
 };
 
 onMounted(() => {
-  // Inicializar filtros desde el store
-  searchQuery.value = documentsStore.searchQuery;
-  sortBy.value = documentsStore.sortBy;
-  fileTypeFilter.value = documentsStore.fileTypeFilter;
-  selectedTags.value = documentsStore.selectedTags;
+  // Aquí podrías cargar los documentos si no están ya en el store
 });
 </script>
 
 <style scoped>
-.dashboard {
+.documents-section {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.stats-row {
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  border-radius: 12px;
-  transition: transform 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-}
-
-.stat-content {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.stat-icon {
-  font-size: 32px;
-  color: #409eff;
-}
-
-.stat-info h3 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.stat-info p {
-  margin: 0;
-  color: #909399;
-  font-size: 14px;
-}
-
-.search-card, .filters-card, .documents-card {
+.documents-card {
   margin-bottom: 20px;
   border-radius: 12px;
-}
-
-.search-section {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.search-input {
-  flex: 1;
-}
-
-.filters-section {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  font-weight: 500;
-  color: #606266;
 }
 
 .card-header {
@@ -501,32 +249,4 @@ onMounted(() => {
   text-align: center;
   padding: 40px 0;
 }
-
-@media (max-width: 768px) {
-  .stats-row .el-col {
-    margin-bottom: 10px;
-  }
-  
-  .search-section {
-    flex-direction: column;
-  }
-  
-  .filters-section {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filter-group {
-    justify-content: space-between;
-  }
-  
-  .documents-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .document-actions {
-    flex-direction: column;
-  }
-}
 </style>
-  
