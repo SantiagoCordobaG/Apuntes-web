@@ -1,0 +1,48 @@
+# Documento de Prueba - Sistema de Gestión de Documentos
+
+## Información del Documento
+- **Título**: Guía de Uso del Sistema
+- **Autor**: Sistema de Pruebas
+- **Fecha**: 2024-01-15
+- **Tipo**: Documento de prueba
+
+## Contenido
+Este es un documento de prueba para verificar el funcionamiento del sistema de gestión de documentos.
+
+### Características del Sistema:
+- Subida de archivos PDF, DOC, DOCX
+- Sistema de etiquetas automáticas
+- Búsqueda avanzada
+- Valoración de documentos
+- Estadísticas en tiempo real
+
+### Funcionalidades Disponibles:
+1. **Gestión de Documentos**
+   - Subir nuevos documentos
+   - Editar información
+   - Eliminar documentos
+   - Descargar archivos
+
+2. **Búsqueda y Filtros**
+   - Búsqueda por texto
+   - Filtros por tipo de archivo
+   - Filtros por autor
+   - Filtros por etiquetas
+   - Filtros por fecha
+
+3. **Sistema de Valoraciones**
+   - Valorar documentos del 1 al 5
+   - Ver promedio de valoraciones
+   - Contador de valoraciones
+
+4. **Estadísticas**
+   - Total de documentos
+   - Total de descargas
+   - Valoración promedio
+   - Documentos por tipo
+
+## Conclusión
+Este sistema está diseñado para facilitar la gestión y organización de documentos académicos y profesionales.
+
+---
+*Documento generado automáticamente por el sistema de gestión de documentos*
