@@ -60,6 +60,6 @@ export default {
         alert("Por favor, completa todos los campos.");
       }
     },
-  },
+  }, 
 };
 </script>
