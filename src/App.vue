@@ -1,11 +1,14 @@
 <template>
-<router-view />
+  <div>
+    <DocumentosList />
+  </div>
 </template>
 
-<script setup>
+<script>
+import DocumentosList from "./components/DocumentosList.vue";
 
+export default {
+  name: "App",
+  components: { DocumentosList },
+};
 </script>
-
-<style>
-
-</style>
