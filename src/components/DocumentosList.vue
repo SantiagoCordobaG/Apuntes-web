@@ -1,115 +1,196 @@
 <template>
-  <div class="documentos-container">
-    <h1 class="titulo">📚 Documentos Disponibles</h1>
+  <div class="documents-section">
+    <el-card class="documents-card">
+      <template #header>
+        <div class="card-header">
+          <h2>📚 Documentos Disponibles</h2>
+        </div>
+      </template>
 
-    <!-- Si aún no hay documentos -->
-    <div v-if="documentos.length === 0" class="mensaje-vacio">
-      <p>No hay documentos disponibles.</p>
-    </div>
-
-    <!-- Lista de documentos -->
-    <div v-else class="cards-container">
-      <div v-for="doc in documentos" :key="doc._id" class="card">
-        <h2>{{ doc.title }}</h2>
-        <p class="descripcion">{{ doc.description }}</p>
-        <p><strong>Autor:</strong> {{ doc.author }}</p>
-        <p><strong>Tipo:</strong> {{ doc.fileType.toUpperCase() }}</p>
-        <p><strong>Fecha:</strong> {{ formatearFecha(doc.uploadDate) }}</p>
-        <p><strong>Descargas:</strong> {{ doc.downloadCount }}</p>
-
-        <button class="btn-descargar">
-          📥 Descargar ({{ doc.fileSize }})
-        </button>
+      <div v-if="documentos.length === 0" class="empty-state">
+        <el-empty description="No se encontraron documentos" />
       </div>
-    </div>
+
+      <div v-else class="documents-grid">
+        <el-card
+          v-for="doc in documentos"
+          :key="doc._id"
+          class="document-card"
+          shadow="hover"
+        >
+          <div class="document-header">
+            <div class="document-icon">
+              <el-icon v-if="doc.fileType === 'pdf'" class="file-icon pdf"><Document /></el-icon>
+              <el-icon v-else class="file-icon word"><Document /></el-icon>
+            </div>
+
+            <div class="document-info">
+              <h3 class="document-title">{{ doc.title }}</h3>
+              <p class="document-description">{{ doc.description }}</p>
+              <div class="document-meta">
+                <span class="author">Por: {{ doc.author }}</span>
+                <span class="date">{{ formatearFecha(doc.uploadDate) }}</span>
+                <span class="size">{{ doc.fileSize }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="document-stats">
+            <div class="rating-section">
+              <el-rate
+                v-model="doc.rating"
+                disabled
+                show-score
+                text-color="#ff9900"
+                score-template="{value}"
+              />
+              <span class="rating-count">({{ doc.ratingCount || 0 }} valoraciones)</span>
+            </div>
+            <div class="download-count">
+              <el-icon><Download /></el-icon>
+              {{ doc.downloadCount || 0 }} descargas
+            </div>
+          </div>
+
+          <div class="document-actions">
+            <el-button type="primary" @click="descargarDocumento(doc)">
+              <el-icon><Download /></el-icon>
+              Descargar
+            </el-button>
+            <el-button @click="verDetalles(doc)">
+              <el-icon><View /></el-icon>
+              Ver Detalles
+            </el-button>
+          </div>
+        </el-card>
+      </div>
+    </el-card>
   </div>
 </template>
 
-<script>
-export default {
-  name: "DocumentosList",
+<script setup>
+import { ref, onMounted } from 'vue';
+import { ElMessage } from 'element-plus';
+import { Document, Download, View } from '@element-plus/icons-vue';
 
-  data() {
-    return {
-      documentos: []
-    };
-  },
+const documentos = ref([]);
 
-  methods: {
-    async cargarDocumentos() {
-      try {
-        const res = await fetch("http://localhost:3000/api/documentos");
-        this.documentos = await res.json();
-        console.log("✅ Documentos cargados:", this.documentos);
-      } catch (err) {
-        console.error("❌ Error al cargar documentos:", err);
-      }
-    },
-    formatearFecha(fecha) {
-      return new Date(fecha).toLocaleDateString("es-ES");
-    }
-  },
-
-  mounted() {
-    this.cargarDocumentos();
+const cargarDocumentos = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/api/documentos");
+    documentos.value = await res.json();
+    console.log("✅ Documentos cargados:", documentos.value);
+  } catch (err) {
+    console.error("❌ Error al cargar documentos:", err);
+    ElMessage.error("Error al cargar documentos");
   }
 };
+
+const descargarDocumento = (doc) => {
+  ElMessage.success(`Descargando ${doc.title}`);
+};
+
+const verDetalles = (doc) => {
+  ElMessage.info(`Viendo detalles de ${doc.title}`);
+};
+
+const formatearFecha = (fecha) => {
+  return new Date(fecha).toLocaleDateString("es-ES");
+};
+
+onMounted(() => {
+  cargarDocumentos();
+});
 </script>
 
 <style scoped>
-.documentos-container {
-  max-width: 1000px;
+.documents-section {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  font-family: 'Poppins', sans-serif;
 }
 
-.titulo {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
+.documents-card {
+  margin-bottom: 20px;
+  border-radius: 12px;
 }
 
-.cards-container {
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.documents-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
 }
 
-.card {
-  background-color: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 1.2rem;
-  transition: transform 0.2s ease;
+.document-card {
+  border-radius: 12px;
+  transition: all 0.3s;
 }
 
-.card:hover {
-  transform: translateY(-5px);
+.document-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.descripcion {
-  color: #555;
-  font-size: 0.95rem;
+.document-header {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
-.btn-descargar {
-  margin-top: 0.8rem;
-  background-color: #ff6f61;
-  border: none;
-  color: white;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.2s;
+.file-icon {
+  font-size: 32px;
 }
 
-.btn-descargar:hover {
-  background-color: #ff4d4d;
+.file-icon.pdf {
+  color: #e74c3c;
 }
 
-.mensaje-vacio {
+.file-icon.word {
+  color: #2b579a;
+}
+
+.document-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.document-description {
+  color: #606266;
+  font-size: 14px;
+}
+
+.document-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.document-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  border-top: 1px solid #ebeef5;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.document-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.empty-state {
   text-align: center;
-  color: #888;
+  padding: 40px 0;
 }
 </style>
