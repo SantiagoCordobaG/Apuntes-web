@@ -58,16 +58,20 @@
           type="primary" 
           @click="editarPerfil"
           :icon="Edit"
+          :loading="cargando"
         >
           Editar Perfil
         </el-button>
         
         <template v-else>
-          <el-button @click="cancelarEdicion">Cancelar</el-button>
+          <el-button @click="cancelarEdicion" :disabled="cargando">
+            Cancelar
+          </el-button>
           <el-button 
             type="success" 
             @click="guardarCambios"
             :icon="Check"
+            :loading="cargando"
           >
             Guardar Cambios
           </el-button>
@@ -78,59 +82,69 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import {
-  ElCard,
-  ElButton,
-  ElDivider,
-  ElDescriptions,
-  ElDescriptionsItem,
-  ElAvatar,
-  ElMessage,
-  ElForm,
-  ElFormItem,
-  ElInput,
-  ElSelect,
-  ElOption,
-} from "element-plus";
+import { ref, onMounted } from "vue";
+import { ElCard, ElButton, ElDivider, ElDescriptions, ElDescriptionsItem, ElAvatar, ElMessage, ElForm, ElFormItem, ElInput, ElSelect, ElOption } from "element-plus";
 import { Edit, Check } from "@element-plus/icons-vue";
+import { obtenerUsuarios, crearUsuario, actualizarUsuario } from "@/services/usuarioService";
 
-const user = ref({
-  nombre: "Alexander Mayiman",
-  correo: "alexander@example.com",
-  rol: "Estudiante",
-  carrera: "Ingeniería de Sistemas",
-  universidad: "Universidad del Valle",
-  avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-});
-
+const user = ref({});
 const userEdit = ref({});
 const modoEdicion = ref(false);
+const cargando = ref(false);
+
+onMounted(async () => {
+  try {
+    cargando.value = true;
+    const usuarios = await obtenerUsuarios();
+    
+    if (usuarios.length === 0) {
+      // Crear usuario automáticamente si no existe
+      const nuevoUsuario = await crearUsuario({
+        nombre: "Alexander Mayiman",
+        correo: "alexander@example.com",
+        rol: "Estudiante",
+        carrera: "Ingeniería de Sistemas",
+        universidad: "Universidad del Valle",
+        avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+      });
+      user.value = nuevoUsuario;
+    } else {
+      user.value = usuarios[0]; // Usar el primer usuario
+    }
+  } catch (error) {
+    ElMessage.error("Error al cargar el perfil");
+  } finally {
+    cargando.value = false;
+  }
+});
 
 const editarPerfil = () => {
-  // Copiar datos actuales al formulario de edición
   userEdit.value = { ...user.value };
   modoEdicion.value = true;
-  ElMessage.info("Modo edición activado ✏️");
 };
 
 const cancelarEdicion = () => {
   modoEdicion.value = false;
   userEdit.value = {};
-  ElMessage.info("Edición cancelada");
 };
 
-const guardarCambios = () => {
-  // Validar que los campos no estén vacíos
+const guardarCambios = async () => {
   if (!userEdit.value.nombre || !userEdit.value.carrera || !userEdit.value.universidad) {
     ElMessage.warning("Por favor completa todos los campos");
     return;
   }
 
-  // Guardar los cambios
-  user.value = { ...userEdit.value };
-  modoEdicion.value = false;
-  ElMessage.success("Cambios guardados correctamente ✅");
+  try {
+    cargando.value = true;
+    const resultado = await actualizarUsuario(user.value._id, userEdit.value);
+    user.value = resultado.usuario;
+    modoEdicion.value = false;
+    ElMessage.success("Cambios guardados ✅");
+  } catch (error) {
+    ElMessage.error("Error al guardar");
+  } finally {
+    cargando.value = false;
+  }
 };
 </script>
 

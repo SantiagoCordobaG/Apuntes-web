@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import DocumentosRoutes from "./routes/Documentos.js";
+import UsuariosRoutes from "./routes/usuarios.js";
 
 
 // ✅ Cargar variables de entorno ANTES de usarlas
@@ -19,17 +20,19 @@ console.log("🧠 MONGO_URI:", process.env.MONGO_URI);
 app.use(cors());  
 app.use(express.json());
 
+// Rutas
 app.use("/api/Documentos", DocumentosRoutes);
+app.use("/api/usuarios", UsuariosRoutes);
 
 // Rutas de prueba
 app.get("/", (req, res) => {
   res.send("Servidor backend funcionando 🚀");
 });
 
-// ✅ Conexión a MongoDB en Railway
+// ✅ Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Conectado a MongoDB (Railway)"))
+  .then(() => console.log("✅ Conectado a MongoDB"))
   .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 
 
