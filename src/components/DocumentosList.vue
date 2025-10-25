@@ -12,12 +12,7 @@
       </div>
 
       <div v-else class="documents-grid">
-        <el-card
-          v-for="doc in documentos"
-          :key="doc._id"
-          class="document-card"
-          shadow="hover"
-        >
+        <el-card v-for="doc in documentos" :key="doc._id" class="document-card" shadow="hover">
           <div class="document-header">
             <div class="document-icon">
               <el-icon v-if="doc.fileType === 'pdf'" class="file-icon pdf"><Document /></el-icon>
@@ -37,13 +32,7 @@
 
           <div class="document-stats">
             <div class="rating-section">
-              <el-rate
-                v-model="doc.rating"
-                disabled
-                show-score
-                text-color="#ff9900"
-                score-template="{value}"
-              />
+              <el-rate v-model="doc.rating" disabled show-score text-color="#ff9900" score-template="{value}" />
               <span class="rating-count">({{ doc.ratingCount || 0 }} valoraciones)</span>
             </div>
             <div class="download-count">
@@ -57,7 +46,7 @@
               <el-icon><Download /></el-icon>
               Descargar
             </el-button>
-            <el-button @click="verDetalles(doc)">
+            <el-button @click="verDetalles(doc._id)">
               <el-icon><View /></el-icon>
               Ver Detalles
             </el-button>
@@ -65,6 +54,27 @@
         </el-card>
       </div>
     </el-card>
+
+    <!-- Diálogo de detalles -->
+    <el-dialog v-model="dialogVisible" title="Detalles del Documento" width="600px">
+      <div v-if="documentoSeleccionado" class="detalles">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="Título">{{ documentoSeleccionado.title }}</el-descriptions-item>
+          <el-descriptions-item label="Descripción">{{ documentoSeleccionado.description }}</el-descriptions-item>
+          <el-descriptions-item label="Autor">{{ documentoSeleccionado.author }}</el-descriptions-item>
+          <el-descriptions-item label="Tipo">{{ documentoSeleccionado.fileType?.toUpperCase() }}</el-descriptions-item>
+          <el-descriptions-item label="Tamaño">{{ documentoSeleccionado.fileSize }}</el-descriptions-item>
+          <el-descriptions-item label="Fecha de subida">{{ formatearFecha(documentoSeleccionado.uploadDate) }}</el-descriptions-item>
+          <el-descriptions-item label="Valoración">
+            <el-rate v-model="documentoSeleccionado.rating" disabled show-score />
+          </el-descriptions-item>
+          <el-descriptions-item label="Descargas">{{ documentoSeleccionado.downloadCount || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="Etiquetas">
+            <el-tag v-for="tag in documentoSeleccionado.tags" :key="tag" size="small" style="margin-right: 5px">{{ tag }}</el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -74,24 +84,30 @@ import { ElMessage } from 'element-plus';
 import { Document, Download, View } from '@element-plus/icons-vue';
 
 const documentos = ref([]);
+const dialogVisible = ref(false);
+const documentoSeleccionado = ref(null);
 
 const cargarDocumentos = async () => {
   try {
     const res = await fetch("http://localhost:3000/api/documentos");
     documentos.value = await res.json();
-    console.log("✅ Documentos cargados:", documentos.value);
   } catch (err) {
-    console.error("❌ Error al cargar documentos:", err);
     ElMessage.error("Error al cargar documentos");
+  }
+};
+
+const verDetalles = async (id) => {
+  try {
+    const res = await fetch(`http://localhost:3000/api/documentos/${id}`);
+    documentoSeleccionado.value = await res.json();
+    dialogVisible.value = true;
+  } catch (err) {
+    ElMessage.error("Error al cargar detalles");
   }
 };
 
 const descargarDocumento = (doc) => {
   ElMessage.success(`Descargando ${doc.title}`);
-};
-
-const verDetalles = (doc) => {
-  ElMessage.info(`Viendo detalles de ${doc.title}`);
 };
 
 const formatearFecha = (fecha) => {

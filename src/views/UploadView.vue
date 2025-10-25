@@ -338,13 +338,8 @@ const submitForm = async () => {
 
   try {
     await formRef.value?.validate();
-    
     uploading.value = true;
     
-    // Simular subida de archivo
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Crear documento
     const documentData = {
       title: form.title,
       description: form.description,
@@ -352,22 +347,26 @@ const submitForm = async () => {
       fileName: form.file.name,
       fileType: form.fileType,
       tags: form.tags,
-      fileSize: formatFileSize(form.file.size)
+      fileSize: formatFileSize(form.file.size),
+      uploadDate: new Date().toISOString(),
+      rating: 0,
+      ratingCount: 0,
+      downloadCount: 0
     };
     
-    documentsStore.addDocument(documentData);
+    const res = await fetch('http://localhost:3000/api/documentos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(documentData)
+    });
+
+    if (!res.ok) throw new Error('Error al subir');
     
     ElMessage.success('Documento subido exitosamente');
-    
-    // Limpiar formulario
     resetForm();
-    
-    // Redirigir al dashboard
     router.push('/');
-    
   } catch (error) {
     ElMessage.error('Error al subir el documento');
-    console.error('Error:', error);
   } finally {
     uploading.value = false;
   }
