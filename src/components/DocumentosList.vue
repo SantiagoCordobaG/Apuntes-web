@@ -106,8 +106,34 @@ const verDetalles = async (id) => {
   }
 };
 
-const descargarDocumento = (doc) => {
-  ElMessage.success(`Descargando ${doc.title}`);
+const descargarDocumento = async (doc) => {
+  try {
+    // Llamar al endpoint de descarga para incrementar contador
+    const res = await fetch(`http://localhost:3000/api/Documentos/download/${doc._id}`);
+    
+    if (!res.ok) {
+      throw new Error('Error al obtener el archivo');
+    }
+    
+    const data = await res.json();
+    
+    // Abrir el archivo de Cloudinary en una nueva pestaña
+    const link = document.createElement('a');
+    link.href = data.fileUrl;
+    link.target = '_blank';
+    link.download = data.fileName || doc.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    ElMessage.success(`Descargando ${doc.title}`);
+    
+    // Actualizar contador localmente
+    doc.downloadCount = (doc.downloadCount || 0) + 1;
+  } catch (error) {
+    console.error('Error al descargar:', error);
+    ElMessage.error('Error al descargar el documento');
+  }
 };
 
 const formatearFecha = (fecha) => {

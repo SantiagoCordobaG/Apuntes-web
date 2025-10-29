@@ -340,33 +340,34 @@ const submitForm = async () => {
     await formRef.value?.validate();
     uploading.value = true;
     
-    const documentData = {
-      title: form.title,
-      description: form.description,
-      author: form.author,
-      fileName: form.file.name,
-      fileType: form.fileType,
-      tags: form.tags,
-      fileSize: formatFileSize(form.file.size),
-      uploadDate: new Date().toISOString(),
-      rating: 0,
-      ratingCount: 0,
-      downloadCount: 0
-    };
+    // Crear FormData para enviar archivo + datos
+    const formData = new FormData();
+    formData.append('file', form.file);
+    formData.append('title', form.title);
+    formData.append('description', form.description);
+    formData.append('author', form.author);
+    formData.append('tags', JSON.stringify(form.tags));
     
-    const res = await fetch('http://localhost:3000/api/documentos', {
+    // Enviar al endpoint de upload
+    const res = await fetch('http://localhost:3000/api/Documentos/upload', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(documentData)
+      body: formData  // NO pongas Content-Type, se pone automáticamente
     });
 
-    if (!res.ok) throw new Error('Error al subir');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Error al subir');
+    }
     
-    ElMessage.success('Documento subido exitosamente');
+    const data = await res.json();
+    console.log('✅ Documento subido:', data);
+    
+    ElMessage.success('Documento subido exitosamente a Cloudinary');
     resetForm();
     router.push('/');
   } catch (error) {
-    ElMessage.error('Error al subir el documento');
+    console.error('Error:', error);
+    ElMessage.error('Error al subir el documento: ' + error.message);
   } finally {
     uploading.value = false;
   }

@@ -31,7 +31,9 @@ app.get("/", (req, res) => {
 
 // ✅ Conexión a MongoDB
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    authSource: "admin"
+  })
   .then(() => console.log("✅ Conectado a MongoDB"))
   .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 
