@@ -26,7 +26,7 @@ app.use("/api/usuarios", UsuariosRoutes);
 
 // Rutas de prueba
 app.get("/", (req, res) => {
-  res.send("Servidor backend funcionando 🚀");
+  res.send("Servidor backend funcionando ");
 });
 
 // ✅ Conexión a MongoDB
