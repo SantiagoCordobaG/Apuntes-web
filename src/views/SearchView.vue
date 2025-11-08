@@ -482,9 +482,73 @@ const highlightText = (text) => {
   return text.replace(regex, '<mark>$1</mark>');
 };
 
-const downloadDocument = (document) => {
-  documentsStore.incrementDownloadCount(document.id);
-  ElMessage.success(`Descargando ${document.title}`);
+const downloadDocument = async (doc) => {
+  try {
+    // Si el documento tiene _id (viene del backend), descargar desde allí
+    if (doc._id) {
+      const res = await fetch(`http://localhost:3000/api/Documentos/download/${doc._id}`);
+      
+      if (!res.ok) {
+        throw new Error('Error al obtener el archivo');
+      }
+
+      // Verificar si la respuesta es un archivo (binary) o JSON (fallback)
+      const contentType = res.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        // Fallback: si el backend devuelve JSON
+        const data = await res.json();
+        const link = document.createElement('a');
+        link.href = data.fileUrl;
+        link.target = '_blank';
+        link.download = data.fileName || doc.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Descargar el archivo directamente desde el backend
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        // Obtener el nombre del archivo del header Content-Disposition o usar el nombre del documento
+        let fileName = doc.fileName || `documento.${doc.fileType || 'pdf'}`;
+        const contentDisposition = res.headers.get('content-disposition');
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (fileNameMatch && fileNameMatch[1]) {
+            fileName = fileNameMatch[1].replace(/['"]/g, '');
+            try {
+              fileName = decodeURIComponent(fileName);
+            } catch (e) {
+              // Si falla la decodificación, usar el nombre tal cual
+            }
+          }
+        }
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Limpiar
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      }
+      
+      ElMessage.success(`Descargando ${doc.title}`);
+      documentsStore.incrementDownloadCount(doc.id);
+    } else {
+      // Si es un documento del store local, solo incrementar contador
+      documentsStore.incrementDownloadCount(doc.id);
+      ElMessage.success(`Descargando ${doc.title}`);
+    }
+  } catch (error) {
+    console.error('Error al descargar:', error);
+    ElMessage.error('Error al descargar el documento: ' + error.message);
+  }
 };
 
 const viewDocument = (document) => {

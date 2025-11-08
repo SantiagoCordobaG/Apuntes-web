@@ -108,23 +108,65 @@ const verDetalles = async (id) => {
 
 const descargarDocumento = async (doc) => {
   try {
-    // Llamar al endpoint de descarga para incrementar contador
+    // Llamar al endpoint de descarga
     const res = await fetch(`http://localhost:3000/api/Documentos/download/${doc._id}`);
     
     if (!res.ok) {
-      throw new Error('Error al obtener el archivo');
+      // Si la respuesta no es OK, intentar parsear como JSON (fallback)
+      try {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al obtener el archivo');
+      } catch (e) {
+        throw new Error('Error al obtener el archivo');
+      }
     }
+
+    // Verificar si la respuesta es un archivo (binary) o JSON (fallback)
+    const contentType = res.headers.get('content-type');
     
-    const data = await res.json();
-    
-    // Abrir el archivo de Cloudinary en una nueva pestaña
-    const link = document.createElement('a');
-    link.href = data.fileUrl;
-    link.target = '_blank';
-    link.download = data.fileName || doc.fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (contentType && contentType.includes('application/json')) {
+      // Fallback: si el backend devuelve JSON (por error en Cloudinary)
+      const data = await res.json();
+      const link = document.createElement('a');
+      link.href = data.fileUrl;
+      link.target = '_blank';
+      link.download = data.fileName || doc.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Descargar el archivo directamente desde el backend
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Obtener el nombre del archivo del header Content-Disposition o usar el nombre del documento
+      let fileName = doc.fileName || `documento.${doc.fileType || 'pdf'}`;
+      const contentDisposition = res.headers.get('content-disposition');
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = fileNameMatch[1].replace(/['"]/g, '');
+          // Decodificar URI si está codificado
+          try {
+            fileName = decodeURIComponent(fileName);
+          } catch (e) {
+            // Si falla la decodificación, usar el nombre tal cual
+          }
+        }
+      }
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpiar
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    }
     
     ElMessage.success(`Descargando ${doc.title}`);
     
@@ -132,7 +174,7 @@ const descargarDocumento = async (doc) => {
     doc.downloadCount = (doc.downloadCount || 0) + 1;
   } catch (error) {
     console.error('Error al descargar:', error);
-    ElMessage.error('Error al descargar el documento');
+    ElMessage.error('Error al descargar el documento: ' + error.message);
   }
 };
 

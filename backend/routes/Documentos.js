@@ -1,7 +1,8 @@
 import express from "express";
 import Documento from "../models/Documento.js";
-import { upload } from "../config/cloudinary.js";
+import { upload, cloudinary } from "../config/cloudinary.js";
 import multer from "multer";
+import axios from "axios";
 
 const router = express.Router();
 
@@ -83,7 +84,7 @@ router.post("/upload", (req, res, next) => {
   res.status(400).json({ error: error.message || "Error al procesar el archivo" });
 });
 
-// 🆕 NUEVO: Descargar documento (incrementa contador y devuelve URL)
+// 🆕 NUEVO: Descargar documento (incrementa contador y sirve el archivo con nombre correcto)
 router.get("/download/:id", async (req, res) => {
   try {
     const documento = await Documento.findById(req.params.id);
@@ -102,11 +103,44 @@ router.get("/download/:id", async (req, res) => {
 
     console.log(`📥 Descarga #${documento.downloadCount}: ${documento.title}`);
 
-    // Devolver la URL de Cloudinary para que el frontend descargue
-    res.json({ 
-      fileUrl: documento.fileUrl,
-      fileName: documento.fileName 
-    });
+    // Obtener el archivo desde Cloudinary
+    try {
+      const response = await axios.get(documento.fileUrl, {
+        responseType: 'arraybuffer'
+      });
+
+      // Determinar el tipo MIME basado en la extensión del archivo
+      const fileExtension = documento.fileName.split('.').pop().toLowerCase();
+      let contentType = 'application/octet-stream';
+      
+      switch (fileExtension) {
+        case 'pdf':
+          contentType = 'application/pdf';
+          break;
+        case 'doc':
+          contentType = 'application/msword';
+          break;
+        case 'docx':
+          contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          break;
+      }
+
+      // Configurar headers para forzar la descarga con el nombre correcto
+      const fileName = documento.fileName || `documento.${fileExtension}`;
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
+      res.setHeader('Content-Length', response.data.length);
+
+      // Enviar el archivo
+      res.send(Buffer.from(response.data));
+    } catch (cloudinaryError) {
+      console.error("❌ Error al descargar desde Cloudinary:", cloudinaryError);
+      // Si falla la descarga desde Cloudinary, devolver la URL como fallback
+      res.json({ 
+        fileUrl: documento.fileUrl,
+        fileName: documento.fileName 
+      });
+    }
   } catch (error) {
     console.error("❌ Error al procesar descarga:", error);
     res.status(500).json({ error: "Error al obtener documento" });
