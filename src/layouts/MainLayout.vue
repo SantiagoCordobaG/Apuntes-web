@@ -34,19 +34,24 @@
         <div class="user-section">
           <el-dropdown>
             <el-button type="text" class="user-button">
-              <el-icon><User /></el-icon>
-              <span>Usuario</span>
+              <el-avatar :size="30" :src="authStore.usuario?.avatar" class="user-avatar">
+                {{ authStore.usuario?.nombre?.charAt(0).toUpperCase() }}
+              </el-avatar>
+              <span class="user-name">{{ authStore.usuario?.nombre || 'Usuario' }}</span>
               <el-icon class="el-icon--right"><ArrowDown /></el-icon>
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="goTo('/perfil')">
+                  <el-icon><User /></el-icon>
                   Mi Perfil
                 </el-dropdown-item>
                 <el-dropdown-item @click="goTo('/mis-documentos')">
+                  <el-icon><Document /></el-icon>
                   Mis Documentos
                 </el-dropdown-item>
-                <el-dropdown-item divided @click="logout">
+                <el-dropdown-item divided @click="handleLogout">
+                  <el-icon><Switch /></el-icon>
                   Cerrar Sesión
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -78,18 +83,21 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import {
   Document,
   House,
   Upload,
   Search,
   User,
-  ArrowDown
+  ArrowDown,
+  Switch
 } from '@element-plus/icons-vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const activeIndex = computed(() => route.path);
 
@@ -102,8 +110,8 @@ const goTo = (path) => {
   router.push(path);
 };
 
-// Cerrar sesión (ejemplo simple)
-const logout = () => {
+// Cerrar sesión
+const handleLogout = () => {
   ElMessageBox.confirm(
     '¿Estás seguro de que quieres cerrar sesión?',
     'Confirmar cierre de sesión',
@@ -114,6 +122,7 @@ const logout = () => {
     }
   )
     .then(() => {
+      authStore.logout();
       ElMessage.success('Sesión cerrada correctamente');
       router.push('/login');
     })
@@ -189,6 +198,20 @@ const logout = () => {
 .user-button {
   color: white;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-avatar {
+  margin-right: 4px;
+}
+
+.user-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-main {

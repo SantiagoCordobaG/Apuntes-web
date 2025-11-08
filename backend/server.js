@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import DocumentosRoutes from "./routes/Documentos.js";
 import UsuariosRoutes from "./routes/usuarios.js";
+import AuthRoutes from "./routes/auth.js";
 
 
 // ✅ Cargar variables de entorno ANTES de usarlas
@@ -23,6 +24,7 @@ app.use(express.json());
 // Rutas
 app.use("/api/Documentos", DocumentosRoutes);
 app.use("/api/usuarios", UsuariosRoutes);
+app.use("/api/auth", AuthRoutes);
 
 // Rutas de prueba
 app.get("/", (req, res) => {

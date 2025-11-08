@@ -6,12 +6,28 @@ import SearchView from "@/views/SearchView.vue";
 import PerfilView from "@/views/PerfilView.vue";
 import MisDocumentosView from "@/views/MisDocumentosView.vue";
 import LoginView from "@/views/LoginView.vue";
+import RegistroView from "@/views/RegistroView.vue";
+import { useAuthStore } from "@/stores/auth";
 
 const routes = [
+  // Rutas públicas (sin autenticación)
+  {
+    path: "/login",
+    name: "Login",
+    component: LoginView,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: "/registro",
+    name: "Registro",
+    component: RegistroView,
+    meta: { requiresAuth: false }
+  },
+  // Rutas protegidas (requieren autenticación)
   {
     path: "/",
-    name: "Home",
     component: MainLayout,
+    meta: { requiresAuth: true },
     children: [
       {
         path: "",
@@ -38,11 +54,6 @@ const routes = [
         name: "MisDocumentos",
         component: MisDocumentosView,
       },
-      {
-        path: "login",
-        name: "Login",
-        component: LoginView,
-      },
     ],
   },
 ];
@@ -50,6 +61,44 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// Navigation guard: proteger rutas que requieren autenticación
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+  
+  // Si la ruta requiere autenticación
+  if (to.meta.requiresAuth) {
+    // Si no hay token, redirigir al login
+    if (!authStore.token) {
+      next({ name: "Login", query: { redirect: to.fullPath } });
+      return;
+    }
+
+    // Si hay token pero no hay usuario, intentar obtenerlo
+    if (!authStore.usuario && authStore.token) {
+      try {
+        await authStore.getUsuarioActual();
+        // Si no se pudo obtener el usuario (token inválido), redirigir al login
+        if (!authStore.usuario) {
+          next({ name: "Login", query: { redirect: to.fullPath } });
+          return;
+        }
+      } catch (error) {
+        console.error("Error al verificar autenticación:", error);
+        next({ name: "Login", query: { redirect: to.fullPath } });
+        return;
+      }
+    }
+  } else {
+    // Si el usuario ya está autenticado y trata de ir a login/registro, redirigir al home
+    if ((to.name === "Login" || to.name === "Registro") && authStore.isAuthenticated) {
+      next({ name: "Dashboard" });
+      return;
+    }
+  }
+
+  next();
 });
 
 export default router;
