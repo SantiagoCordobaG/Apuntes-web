@@ -1,113 +1,138 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-50">
-    <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-      <h2 class="text-2xl font-bold text-center mb-6 text-purple-700">
-        Crear Cuenta
-      </h2>
+  <div class="register-container">
+    <div class="register-background">
+      <div class="gradient-orb orb-1"></div>
+      <div class="gradient-orb orb-2"></div>
+      <div class="gradient-orb orb-3"></div>
+    </div>
 
-      <form @submit.prevent="handleRegistro">
-        <div class="mb-4">
-          <label class="font-semibold">Nombre completo</label>
-          <input
+    <div class="register-card">
+      <div class="register-header">
+        <div class="logo-wrapper">
+          <el-icon class="logo-icon"><UserFilled /></el-icon>
+        </div>
+        <h1 class="register-title">Crea tu cuenta</h1>
+        <p class="register-subtitle">Únete a nuestra comunidad</p>
+      </div>
+
+      <el-form @submit.prevent="handleRegistro" class="register-form">
+        <el-form-item>
+          <el-input
             v-model="nombre"
             type="text"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
-            placeholder="Juan Pérez"
-            required
+            placeholder="Nombre completo"
+            size="large"
+            :prefix-icon="User"
             :disabled="loading"
+            class="custom-input"
           />
-        </div>
+        </el-form-item>
 
-        <div class="mb-4">
-          <label class="font-semibold">Correo electrónico</label>
-          <input
+        <el-form-item>
+          <el-input
             v-model="correo"
             type="email"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
-            placeholder="tu@correo.com"
-            required
+            placeholder="Correo electrónico"
+            size="large"
+            :prefix-icon="Message"
             :disabled="loading"
+            class="custom-input"
           />
-        </div>
+        </el-form-item>
 
-        <div class="mb-4">
-          <label class="font-semibold">Contraseña</label>
-          <input
+        <el-form-item>
+          <el-input
             v-model="password"
             type="password"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
-            placeholder="Mínimo 6 caracteres"
-            required
-            minlength="6"
+            placeholder="Contraseña (mínimo 6 caracteres)"
+            size="large"
+            :prefix-icon="Lock"
+            show-password
             :disabled="loading"
+            class="custom-input"
           />
-          <p class="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
-        </div>
+        </el-form-item>
 
-        <div class="mb-4">
-          <label class="font-semibold">Confirmar contraseña</label>
-          <input
+        <el-form-item>
+          <el-input
             v-model="confirmPassword"
             type="password"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
-            placeholder="Repite tu contraseña"
-            required
+            placeholder="Confirmar contraseña"
+            size="large"
+            :prefix-icon="Lock"
+            show-password
             :disabled="loading"
+            class="custom-input"
+            @keyup.enter="handleRegistro"
           />
-        </div>
+        </el-form-item>
 
-        <div class="mb-4">
-          <label class="font-semibold">Rol</label>
-          <select
+        <el-form-item>
+          <el-select
             v-model="rol"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
+            placeholder="Selecciona tu rol"
+            size="large"
+            class="custom-select"
             :disabled="loading"
           >
-            <option value="Estudiante">Estudiante</option>
-            <option value="Profesor">Profesor</option>
-          </select>
-        </div>
+            <el-option label="Estudiante" value="Estudiante" />
+            <el-option label="Profesor" value="Profesor" />
+          </el-select>
+        </el-form-item>
 
-        <div class="mb-4">
-          <label class="font-semibold">Carrera (opcional)</label>
-          <input
+        <el-form-item>
+          <el-input
             v-model="carrera"
             type="text"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
-            placeholder="Ingeniería, Medicina, etc."
+            placeholder="Carrera (opcional)"
+            size="large"
+            :prefix-icon="School"
             :disabled="loading"
+            class="custom-input"
           />
-        </div>
+        </el-form-item>
 
-        <div class="mb-6">
-          <label class="font-semibold">Universidad (opcional)</label>
-          <input
+        <el-form-item>
+          <el-input
             v-model="universidad"
             type="text"
-            class="w-full border border-gray-300 rounded-md p-2 mt-1"
-            placeholder="Nombre de tu universidad"
+            placeholder="Universidad (opcional)"
+            size="large"
+            :prefix-icon="OfficeBuilding"
             :disabled="loading"
+            class="custom-input"
           />
-        </div>
+        </el-form-item>
 
-        <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {{ errorMessage }}
-        </div>
+        <el-alert
+          v-if="errorMessage"
+          :title="errorMessage"
+          type="error"
+          :closable="false"
+          show-icon
+          class="error-alert"
+        />
 
-        <button
-          type="submit"
-          class="bg-purple-600 w-full text-white py-2 rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          :disabled="loading"
+        <el-button
+          type="primary"
+          size="large"
+          :loading="loading"
+          @click="handleRegistro"
+          class="register-button"
         >
-          <span v-if="loading">Creando cuenta...</span>
-          <span v-else>Registrarse</span>
-        </button>
-      </form>
+          <span v-if="!loading">Crear Cuenta</span>
+          <span v-else>Creando cuenta...</span>
+        </el-button>
+      </el-form>
 
-      <p class="text-center text-sm text-gray-600 mt-4">
-        ¿Ya tienes cuenta?
-        <router-link to="/login" class="text-purple-600 hover:underline">Inicia sesión aquí</router-link>
-      </p>
+      <div class="register-footer">
+        <p class="footer-text">
+          ¿Ya tienes cuenta?
+          <router-link to="/login" class="login-link">
+            Inicia sesión aquí
+          </router-link>
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -117,6 +142,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { ElMessage } from 'element-plus';
+import { UserFilled, User, Message, Lock, School, OfficeBuilding } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -180,3 +206,268 @@ const handleRegistro = async () => {
 };
 </script>
 
+<style scoped>
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.register-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: float 20s infinite ease-in-out;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  top: -200px;
+  left: -200px;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  bottom: -150px;
+  right: -150px;
+  animation-delay: 5s;
+}
+
+.orb-3 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: 10s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.register-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+  animation: slideUp 0.5s ease-out;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.logo-icon {
+  font-size: 32px;
+  color: white;
+}
+
+.register-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.register-subtitle {
+  font-size: 16px;
+  color: #718096;
+  margin: 0;
+}
+
+.register-form {
+  margin-top: 32px;
+}
+
+.register-form :deep(.el-form-item) {
+  margin-bottom: 20px;
+}
+
+.custom-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.custom-input :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.custom-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.custom-select {
+  width: 100%;
+}
+
+.custom-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.custom-select :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.error-alert {
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.register-button {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.register-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.register-button:active {
+  transform: translateY(0);
+}
+
+.register-footer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+.login-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+  transition: all 0.3s ease;
+}
+
+.login-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* Scrollbar personalizado */
+.register-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.register-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.register-card::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 4px;
+}
+
+.register-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+    max-height: 95vh;
+  }
+
+  .register-title {
+    font-size: 24px;
+  }
+
+  .logo-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .logo-icon {
+    font-size: 28px;
+  }
+
+  .register-form :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+}
+</style>
