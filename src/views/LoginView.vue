@@ -11,10 +11,9 @@
         <div class="logo-wrapper">
           <el-icon class="logo-icon"><Document /></el-icon>
         </div>
-        <h1 class="login-title">Repositorio De Apuntes USC</h1>
         <h1 class="login-title">Bienvenido de nuevo</h1>
         <p class="login-subtitle">Inicia sesión para continuar</p>
-      </div>
+      </div> 
 
       <el-form @submit.prevent="handleLogin" class="login-form">
         <el-form-item>

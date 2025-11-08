@@ -24,7 +24,7 @@
             <el-icon><Upload /></el-icon>
             <span>Subir Documento</span>
           </el-menu-item>
-          <el-menu-item index="/search">
+          <el-menu-item index="/" @click="handleSelect('/')">
             <el-icon><Search /></el-icon>
             <span>Búsqueda Avanzada</span>
           </el-menu-item>
