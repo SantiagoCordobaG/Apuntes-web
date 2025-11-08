@@ -8,7 +8,7 @@ module.exports = defineConfig({
       '/api': {
         target: 'http://localhost:3000', // URL de tu backend
         changeOrigin: true,
-        pathRewrite: { '^/api': '' },
+        // No reescribir el path, mantener /api en la URL
       },
     },
   },

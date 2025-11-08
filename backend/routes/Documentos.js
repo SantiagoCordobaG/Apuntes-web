@@ -1,6 +1,7 @@
 import express from "express";
 import Documento from "../models/Documento.js";
 import { upload } from "../config/cloudinary.js";
+import multer from "multer";
 
 const router = express.Router();
 
@@ -15,11 +16,26 @@ router.get("/", async (req, res) => {
   }
 });
 
+// 🆕 Ruta de prueba para verificar que la ruta está funcionando
+router.post("/upload/test", (req, res) => {
+  console.log("✅ Ruta de prueba /upload/test funcionando");
+  res.json({ message: "Ruta de prueba funcionando", body: req.body });
+});
+
 // 🆕 NUEVO: Subir documento con archivo a Cloudinary
-router.post("/upload", upload.single('file'), async (req, res) => {
+router.post("/upload", (req, res, next) => {
+  console.log("📥 POST /upload recibido - antes de multer");
+  console.log("📦 Headers:", req.headers['content-type']);
+  next();
+}, upload.single('file'), async (req, res) => {
+  console.log("📥 POST /upload recibido - después de multer");
+  console.log("📦 Body:", req.body);
+  console.log("📁 File:", req.file ? "Archivo recibido" : "No hay archivo");
+  
   try {
     // Validar que se subió un archivo
     if (!req.file) {
+      console.log("❌ No se subió ningún archivo");
       return res.status(400).json({ error: "No se subió ningún archivo" });
     }
 
@@ -55,6 +71,16 @@ router.post("/upload", upload.single('file'), async (req, res) => {
     console.error("❌ Error al subir documento:", error);
     res.status(500).json({ error: "Error al subir documento: " + error.message });
   }
+}, (error, req, res, next) => {
+  // Manejo de errores de multer
+  console.error("❌ Error de multer:", error);
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: "El archivo es demasiado grande. Máximo 10MB" });
+    }
+    return res.status(400).json({ error: error.message });
+  }
+  res.status(400).json({ error: error.message || "Error al procesar el archivo" });
 });
 
 // 🆕 NUEVO: Descargar documento (incrementa contador y devuelve URL)
