@@ -94,7 +94,7 @@ const handleLogin = async () => {
   errorMessage.value = '';
   
   if (!correo.value || !password.value) {
-    errorMessage.value = 'Por favor, completa todos los campos.';
+    errorMessage.value = 'Por favor, completa todos los campos obligatorios';
     return;
   }
 
