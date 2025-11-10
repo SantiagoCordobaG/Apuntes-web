@@ -25,7 +25,7 @@ export const registrarUsuario = async (req, res) => {
     const usuarioExistente = await Usuario.findOne({ correo });
     if (usuarioExistente) {
       return res.status(400).json({
-        error: "Este correo electrónico ya está registrado"
+        error: "Este correo electrónico ya está registrado, intenta con otro correo."
       });
     }
 
