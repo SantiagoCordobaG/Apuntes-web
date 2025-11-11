@@ -46,17 +46,13 @@ webpack compiled with 1 error<template>
           mode="horizontal"
           @select="handleSelect"
         >
-          <el-menu-item index="/">
-            <el-icon><House /></el-icon>
-            <span>Inicio</span>
+          <el-menu-item index="/?tab=documents">
+            <el-icon><Document /></el-icon>
+            <span>Documentos</span>
           </el-menu-item>
-          <el-menu-item index="/upload">
+          <el-menu-item index="/?tab=upload">
             <el-icon><Upload /></el-icon>
-            <span>Subir Documento</span>
-          </el-menu-item>
-          <el-menu-item index="/" @click="handleSelect('/')">
-            <el-icon><Search /></el-icon>
-            <span>Búsqueda Avanzada</span>
+            <span>Subir</span>
           </el-menu-item>
         </el-menu>
 
@@ -72,11 +68,11 @@ webpack compiled with 1 error<template>
             </el-button>
             <template #dropdown>
               <el-dropdown-menu class="user-dropdown-menu">
-                <el-dropdown-item @click="goTo('/perfil')" class="dropdown-item">
+                <el-dropdown-item @click="goTo('/?tab=profile')" class="dropdown-item">
                   <el-icon class="dropdown-item-icon"><User /></el-icon>
                   <span>Mi Perfil</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click="goTo('/mis-documentos')" class="dropdown-item">
+                <el-dropdown-item @click="goTo('/?tab=mydocuments')" class="dropdown-item">
                   <el-icon class="dropdown-item-icon"><Document /></el-icon>
                   <span>Mis Documentos</span>
                 </el-dropdown-item>
@@ -101,9 +97,9 @@ webpack compiled with 1 error<template>
       <div class="footer-content">
         <p>&copy; 2025 Repositorio de Apuntes. Todos los derechos reservados.</p>
         <div class="footer-links">
-          <el-link type="primary" @click="goTo('/terminos')">Términos de Uso</el-link>
-          <el-link type="primary" @click="goTo('/privacidad')">Política de Privacidad</el-link>
-          <el-link type="primary" @click="goTo('/contacto')">Contacto</el-link>
+          <el-link type="primary" @click="goTo('/?tab=terms')">Términos de Uso</el-link>
+          <el-link type="primary" @click="goTo('/?tab=privacy')">Política de Privacidad</el-link>
+          <el-link type="primary" @click="goTo('/?tab=contact')">Contacto</el-link>
         </div>
       </div>
     </el-footer>
@@ -116,12 +112,10 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import {
   Document,
-  House,
-  Upload,
-  Search,
   User,
   ArrowDown,
-  Switch
+  Switch,
+  Upload
 } from '@element-plus/icons-vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 
@@ -129,7 +123,12 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-const activeIndex = computed(() => route.path);
+const activeIndex = computed(() => {
+  const tab = route.query.tab || 'documents';
+  // Si la pestaña es search, mostrar documents como activo
+  const activeTab = tab === 'search' ? 'documents' : tab;
+  return `/?tab=${activeTab}`;
+});
 
 const handleSelect = (key) => {
   router.push(key);

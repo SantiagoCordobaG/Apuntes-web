@@ -104,41 +104,11 @@ const openInstagram = (url) => {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: cardSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes cardSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.contacto-card:hover {
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .contacto-header {
   text-align: center;
   margin-bottom: 48px;
-  animation: headerFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
-}
-
-@keyframes headerFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .contacto-title {
@@ -146,32 +116,16 @@ const openInstagram = (url) => {
   font-size: 42px;
   font-weight: 700;
   color: #1a1a1a;
-  letter-spacing: -1px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  line-height: 1.2;
 }
 
 .contacto-subtitle {
   margin: 0;
   font-size: 18px;
   color: #666666;
-  font-weight: 400;
 }
 
 .qr-section {
   margin-bottom: 48px;
-  animation: qrFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
-}
-
-@keyframes qrFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .qr-grid {
@@ -188,31 +142,6 @@ const openInstagram = (url) => {
   background: rgba(0, 0, 0, 0.02);
   border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: qrCardIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.qr-card:nth-child(1) { animation-delay: 0.1s; }
-.qr-card:nth-child(2) { animation-delay: 0.2s; }
-.qr-card:nth-child(3) { animation-delay: 0.3s; }
-.qr-card:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes qrCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.qr-card:hover {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.12);
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
 .qr-wrapper {
@@ -224,23 +153,12 @@ const openInstagram = (url) => {
   overflow: hidden;
   background: white;
   border: 2px solid rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.qr-card:hover .qr-wrapper {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .qr-image {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.qr-card:hover .qr-image {
-  transform: scale(1.05);
 }
 
 .qr-overlay {
@@ -254,7 +172,7 @@ const openInstagram = (url) => {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.3s;
 }
 
 .qr-card:hover .qr-overlay {
@@ -264,12 +182,6 @@ const openInstagram = (url) => {
 .qr-icon {
   font-size: 48px;
   color: white;
-  transform: scale(0.8);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.qr-card:hover .qr-icon {
-  transform: scale(1);
 }
 
 .qr-info {
@@ -282,8 +194,6 @@ const openInstagram = (url) => {
   font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  letter-spacing: -0.3px;
 }
 
 .instagram-button {
@@ -295,55 +205,13 @@ const openInstagram = (url) => {
   background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
   border: none;
   color: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.instagram-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.4s ease, height 0.4s ease;
-}
-
-.instagram-button:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.instagram-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(188, 24, 136, 0.3);
-}
-
-.instagram-button:active {
-  transform: translateY(0) scale(0.98);
 }
 
 .contact-info {
-  animation: infoFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
-}
-
-@keyframes infoFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  text-align: center;
 }
 
 .info-card {
-  text-align: center;
   padding: 32px;
   background: rgba(0, 0, 0, 0.02);
   border-radius: 16px;
@@ -361,7 +229,6 @@ const openInstagram = (url) => {
   font-size: 24px;
   font-weight: 600;
   color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
 }
 
 .info-card p {
@@ -369,30 +236,6 @@ const openInstagram = (url) => {
   font-size: 16px;
   color: #666666;
   line-height: 1.6;
-}
-
-@media (max-width: 768px) {
-  .contacto-container {
-    padding: 20px 16px;
-  }
-
-  .contacto-card {
-    padding: 24px;
-  }
-
-  .contacto-title {
-    font-size: 32px;
-  }
-
-  .qr-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .qr-wrapper {
-    width: 200px;
-    height: 200px;
-  }
 }
 </style>
 

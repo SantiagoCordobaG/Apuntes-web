@@ -60,9 +60,9 @@
       <div class="login-footer">
         <p class="footer-text">
           ¿No tienes cuenta?
-          <router-link to="/registro" class="register-link">
+          <a href="#" @click.prevent="$emit('switch-tab', 'register')" class="register-link">
             Regístrate aquí
-          </router-link>
+          </a>
         </p>
       </div>
     </div>
@@ -75,6 +75,9 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { ElMessage } from 'element-plus';
 import { Document, Message, Lock } from '@element-plus/icons-vue';
+
+// eslint-disable-next-line no-undef
+defineEmits(['switch-tab']);
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -116,14 +119,7 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: #fafafa;
-  padding: 20px;
+  width: 100%;
   animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -141,15 +137,13 @@ const handleLogin = async () => {
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-radius: 24px;
-  padding: 56px 48px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  max-width: 100%;
+  box-shadow: none;
+  border: none;
   position: relative;
   z-index: 1;
   animation: cardSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
