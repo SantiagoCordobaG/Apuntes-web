@@ -222,10 +222,21 @@
               <el-icon><View /></el-icon>
               Ver Detalles
             </el-button>
+            <el-button type="warning" @click="abrirDialogoValoracion(doc)">
+              <el-icon><Star /></el-icon>
+              Valorar
+            </el-button>
           </div>
         </el-card>
       </div>
     </el-card>
+
+    <!-- Diálogo de valoración -->
+    <RatingDialog
+      v-model="ratingDialogVisible"
+      :document="documentoParaValorar"
+      @rated="handleRatingSubmitted"
+    />
 
     <!-- Diálogo de detalles -->
     <el-dialog v-model="dialogVisible" title="Detalles del Documento" width="600px">
@@ -253,7 +264,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Document, Download, View, Search, Refresh } from '@element-plus/icons-vue';
+import { Document, Download, View, Search, Refresh, Star } from '@element-plus/icons-vue';
+import RatingDialog from './RatingDialog.vue';
 
 const documentos = ref([]);
 const documentosFiltrados = ref([]);
@@ -261,6 +273,8 @@ const dialogVisible = ref(false);
 const documentoSeleccionado = ref(null);
 const loading = ref(false);
 const activeCollapse = ref([]);
+const ratingDialogVisible = ref(false);
+const documentoParaValorar = ref(null);
 
 // Formulario de búsqueda
 const searchForm = ref({
@@ -492,6 +506,26 @@ const formatearFecha = (fecha) => {
     });
   } catch (e) {
     return fecha;
+  }
+};
+
+const abrirDialogoValoracion = (doc) => {
+  documentoParaValorar.value = doc;
+  ratingDialogVisible.value = true;
+};
+
+const handleRatingSubmitted = (data) => {
+  // Actualizar el documento en la lista con la nueva valoración
+  const docIndex = documentos.value.findIndex(d => d._id === data.documentId);
+  if (docIndex !== -1 && data.documento) {
+    documentos.value[docIndex].rating = data.documento.rating;
+    documentos.value[docIndex].ratingCount = data.documento.ratingCount;
+    // Actualizar también en documentosFiltrados si existe
+    const filteredIndex = documentosFiltrados.value.findIndex(d => d._id === data.documentId);
+    if (filteredIndex !== -1) {
+      documentosFiltrados.value[filteredIndex].rating = data.documento.rating;
+      documentosFiltrados.value[filteredIndex].ratingCount = data.documento.ratingCount;
+    }
   }
 };
 

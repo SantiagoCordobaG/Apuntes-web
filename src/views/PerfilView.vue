@@ -44,10 +44,6 @@
         <el-form-item label="Universidad">
           <el-input v-model="userEdit.universidad" placeholder="Tu universidad" />
         </el-form-item>
-
-        <el-form-item label="Avatar URL">
-          <el-input v-model="userEdit.avatar" placeholder="URL de tu foto de perfil" />
-        </el-form-item>
       </el-form>
 
       <el-divider />
@@ -85,8 +81,12 @@
 import { ref, onMounted } from "vue";
 import { ElCard, ElButton, ElDivider, ElDescriptions, ElDescriptionsItem, ElAvatar, ElMessage, ElForm, ElFormItem, ElInput, ElSelect, ElOption } from "element-plus";
 import { Edit, Check } from "@element-plus/icons-vue";
-import { obtenerUsuarios, crearUsuario, actualizarUsuario } from "@/services/usuarioService";
+import { useAuthStore } from "@/stores/auth";
+import { actualizarUsuario } from "@/services/usuarioService";
+import { useRouter } from "vue-router";
 
+const authStore = useAuthStore();
+const router = useRouter();
 const user = ref({});
 const userEdit = ref({});
 const modoEdicion = ref(false);
@@ -95,24 +95,35 @@ const cargando = ref(false);
 onMounted(async () => {
   try {
     cargando.value = true;
-    const usuarios = await obtenerUsuarios();
     
-    if (usuarios.length === 0) {
-      // Crear usuario automáticamente si no existe
-      const nuevoUsuario = await crearUsuario({
-        nombre: "Alexander Mayiman",
-        correo: "alexander@example.com",
-        rol: "Estudiante",
-        carrera: "Ingeniería de Sistemas",
-        universidad: "Universidad del Valle",
-        avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-      });
-      user.value = nuevoUsuario;
+    // Verificar si hay un usuario autenticado
+    if (!authStore.isAuthenticated || !authStore.token) {
+      ElMessage.warning("Debes iniciar sesión para ver tu perfil");
+      router.push("/login");
+      return;
+    }
+
+    // Obtener el usuario actual del servidor
+    const usuarioActual = await authStore.getUsuarioActual();
+    
+    if (usuarioActual) {
+      user.value = usuarioActual;
     } else {
-      user.value = usuarios[0]; // Usar el primer usuario
+      // Si no se puede obtener, usar el del store (localStorage)
+      if (authStore.usuario) {
+        user.value = authStore.usuario;
+      } else {
+        ElMessage.error("No se pudo cargar el perfil");
+        router.push("/login");
+      }
     }
   } catch (error) {
+    console.error("Error al cargar el perfil:", error);
     ElMessage.error("Error al cargar el perfil");
+    // Intentar usar el usuario del store como respaldo
+    if (authStore.usuario) {
+      user.value = authStore.usuario;
+    }
   } finally {
     cargando.value = false;
   }
@@ -138,10 +149,16 @@ const guardarCambios = async () => {
     cargando.value = true;
     const resultado = await actualizarUsuario(user.value._id, userEdit.value);
     user.value = resultado.usuario;
+    
+    // Actualizar el store de autenticación con los nuevos datos
+    authStore.usuario = resultado.usuario;
+    localStorage.setItem('usuario', JSON.stringify(resultado.usuario));
+    
     modoEdicion.value = false;
     ElMessage.success("Cambios guardados ✅");
   } catch (error) {
-    ElMessage.error("Error al guardar");
+    console.error("Error al guardar:", error);
+    ElMessage.error("Error al guardar los cambios");
   } finally {
     cargando.value = false;
   }

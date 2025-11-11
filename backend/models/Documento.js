@@ -12,7 +12,12 @@ const DocumentoSchema = new mongoose.Schema({
   fileKey: String,      // ID del archivo en Cloudinary (para poder eliminarlo)
   
   uploadDate: String,
-  author: String,
+  usuario: String,      // Nombre del usuario que subió el documento (obligatorio)
+  author: String,       // Autor del documento/libro (opcional, puede ser diferente al que lo sube)
+  uploadedBy: {         // ID del usuario que subió el documento
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Usuario'
+  },
   tags: [String],
   rating: { type: Number, default: 0 },
   ratingCount: { type: Number, default: 0 },

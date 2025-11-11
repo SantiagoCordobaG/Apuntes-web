@@ -1,8 +1,10 @@
 import express from "express";
 import Documento from "../models/Documento.js";
+import Valoracion from "../models/Valoracion.js";
 import { upload, cloudinary } from "../config/cloudinary.js";
 import multer from "multer";
 import axios from "axios";
+import { verificarToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -23,10 +25,11 @@ router.post("/upload/test", (req, res) => {
   res.json({ message: "Ruta de prueba funcionando", body: req.body });
 });
 
-// 🆕 NUEVO: Subir documento con archivo a Cloudinary
-router.post("/upload", (req, res, next) => {
+// 🆕 NUEVO: Subir documento con archivo a Cloudinary (requiere autenticación)
+router.post("/upload", verificarToken, (req, res, next) => {
   console.log("📥 POST /upload recibido - antes de multer");
   console.log("📦 Headers:", req.headers['content-type']);
+  console.log("👤 Usuario autenticado:", req.usuario.nombre);
   next();
 }, upload.single('file'), async (req, res) => {
   console.log("📥 POST /upload recibido - después de multer");
@@ -41,17 +44,26 @@ router.post("/upload", (req, res, next) => {
     }
 
     // Validar campos requeridos
-    if (!req.body.title || !req.body.description || !req.body.author) {
-      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    if (!req.body.title || !req.body.description || !req.body.usuario) {
+      return res.status(400).json({ error: "Faltan campos obligatorios (título, descripción y usuario)" });
     }
 
     console.log("📤 Archivo subido a Cloudinary:", req.file.path);
+    console.log("👤 Usuario autenticado - ID:", req.userId);
+    console.log("👤 Usuario autenticado - Nombre:", req.usuario?.nombre);
+    console.log("📝 Datos recibidos:", {
+      title: req.body.title,
+      usuario: req.body.usuario,
+      author: req.body.author
+    });
 
     // Crear documento con la información del archivo
     const nuevoDocumento = new Documento({
       title: req.body.title,
       description: req.body.description,
-      author: req.body.author,
+      usuario: req.body.usuario,     // Nombre del usuario que subió el documento (obligatorio)
+      author: req.body.author || "", // Autor del documento/libro (opcional)
+      uploadedBy: req.userId,        // ID del usuario que subió el documento
       fileName: req.file.originalname,
       fileType: req.file.originalname.split('.').pop().toLowerCase(),
       fileUrl: req.file.path,           // URL completa de Cloudinary
@@ -64,8 +76,23 @@ router.post("/upload", (req, res, next) => {
       downloadCount: 0
     });
 
+    // Guardar en MongoDB de forma persistente
     await nuevoDocumento.save();
-    console.log("✅ Documento guardado en MongoDB");
+    
+    console.log("✅ Documento guardado PERMANENTEMENTE en MongoDB:");
+    console.log("  - ID del documento:", nuevoDocumento._id);
+    console.log("  - uploadedBy guardado:", nuevoDocumento.uploadedBy);
+    console.log("  - usuario guardado:", nuevoDocumento.usuario);
+    console.log("  - Título:", nuevoDocumento.title);
+    console.log("  - El documento persistirá incluso después de cerrar sesión");
+    
+    // Verificar que se guardó correctamente
+    const documentoVerificado = await Documento.findById(nuevoDocumento._id);
+    if (documentoVerificado) {
+      console.log("✅ Verificación: Documento confirmado en la base de datos");
+    } else {
+      console.error("❌ Error: Documento no encontrado después de guardar");
+    }
     
     res.status(201).json(nuevoDocumento);
   } catch (error) {
@@ -168,6 +195,113 @@ router.post("/", async (req, res) => {
     res.status(201).json(nuevoDocumento);
   } catch (error) {
     res.status(500).json({ error: "Error al crear documento" });
+  }
+});
+
+// 🆕 Valorar un documento (requiere autenticación)
+router.post("/:id/rate", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comentario } = req.body;
+    const userId = req.userId;
+
+    // Validar que el rating esté entre 1 y 5 (convertir a número para asegurar)
+    const ratingValue = Number(rating);
+    if (!ratingValue || isNaN(ratingValue) || ratingValue < 1 || ratingValue > 5) {
+      return res.status(400).json({ error: "La valoración debe estar entre 1 y 5" });
+    }
+
+    // Verificar que el documento existe
+    const documento = await Documento.findById(id);
+    if (!documento) {
+      return res.status(404).json({ error: "Documento no encontrado" });
+    }
+
+    // Verificar si el usuario ya valoró este documento
+    const valoracionExistente = await Valoracion.findOne({
+      documento: id,
+      usuario: userId
+    });
+
+    let valoracion;
+
+    if (valoracionExistente) {
+      // Actualizar valoración existente
+      valoracionExistente.rating = ratingValue;  // Usar el valor convertido
+      if (comentario !== undefined) {
+        valoracionExistente.comentario = comentario || "";
+      }
+      valoracionExistente.fecha = new Date();
+      await valoracionExistente.save();
+      valoracion = valoracionExistente;
+    } else {
+      // Crear nueva valoración
+      valoracion = new Valoracion({
+        documento: id,
+        usuario: userId,
+        rating: ratingValue,  // Usar el valor convertido
+        comentario: comentario || ""
+      });
+      await valoracion.save();
+    }
+
+    // Calcular el nuevo promedio de valoraciones
+    const todasLasValoraciones = await Valoracion.find({ documento: id });
+    const totalRating = todasLasValoraciones.reduce((sum, v) => sum + v.rating, 0);
+    const promedio = totalRating / todasLasValoraciones.length;
+
+    // Actualizar el documento con el nuevo promedio
+    documento.rating = Math.round(promedio * 10) / 10; // Redondear a 1 decimal
+    documento.ratingCount = todasLasValoraciones.length;
+    await documento.save();
+
+    console.log(`⭐ Valoración guardada: ${rating}/5 para documento ${id} por usuario ${userId}`);
+
+    res.json({
+      message: "Valoración guardada exitosamente",
+      valoracion: {
+        rating: valoracion.rating,
+        comentario: valoracion.comentario,
+        fecha: valoracion.fecha
+      },
+      documento: {
+        rating: documento.rating,
+        ratingCount: documento.ratingCount
+      }
+    });
+  } catch (error) {
+    console.error("❌ Error al valorar documento:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "Ya has valorado este documento" });
+    }
+    res.status(500).json({ error: "Error al valorar documento: " + error.message });
+  }
+});
+
+// 🆕 Obtener valoración del usuario actual para un documento
+router.get("/:id/my-rating", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const valoracion = await Valoracion.findOne({
+      documento: id,
+      usuario: userId
+    });
+
+    if (!valoracion) {
+      return res.json({ hasRated: false });
+    }
+
+    res.json({
+      hasRated: true,
+      rating: valoracion.rating,
+      comentario: valoracion.comentario,
+      fecha: valoracion.fecha
+    });
+  } catch (error) {
+    console.error("❌ Error al obtener valoración:", error);
+    res.status(500).json({ error: "Error al obtener valoración" });
   }
 });
 

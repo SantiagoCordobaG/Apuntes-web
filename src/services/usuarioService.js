@@ -32,11 +32,19 @@ export async function crearUsuario(usuario) {
 }
 
 export async function actualizarUsuario(id, usuario) {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  // Agregar token de autenticación si está disponible
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
   const response = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(usuario),
   });
   if (!response.ok) {
