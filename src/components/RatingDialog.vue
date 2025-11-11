@@ -314,7 +314,50 @@ onMounted(() => {
 
 <style scoped>
 .rating-dialog {
-  padding: 10px 0;
+  padding: 0;
+}
+
+.rating-dialog :deep(.el-dialog) {
+  border-radius: 20px;
+  overflow: hidden;
+  animation: dialogSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.rating-dialog :deep(.el-dialog__header) {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.rating-dialog :deep(.el-dialog__title) {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+}
+
+.rating-dialog :deep(.el-dialog__body) {
+  padding: 24px;
+}
+
+.rating-dialog :deep(.el-dialog__footer) {
+  padding: 16px 24px 24px;
+  border-top: 2px solid #f1f5f9;
+  background: #f8fafc;
 }
 
 .document-info {
@@ -348,9 +391,11 @@ onMounted(() => {
 }
 
 .rating-section h4 {
-  margin: 0 0 15px 0;
-  color: #303133;
-  font-size: 16px;
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .rating-buttons {
@@ -429,16 +474,19 @@ onMounted(() => {
 }
 
 .comment-section h4 {
-  margin: 0 0 15px 0;
-  color: #303133;
-  font-size: 16px;
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .current-rating {
-  background-color: #f5f7fa;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #c7d2fe;
 }
 
 .current-rating h4 {
@@ -459,17 +507,60 @@ onMounted(() => {
 }
 
 .user-rating-info {
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #f0f9ff;
-  border-radius: 6px;
+  margin-top: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 10px;
   text-align: center;
+  border: 1px solid #93c5fd;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
+}
+
+.dialog-footer :deep(.el-button) {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 10px 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dialog-footer :deep(.el-button:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-footer :deep(.el-button) {
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+}
+
+.dialog-footer :deep(.el-button:hover) {
+  background: #f5f5f5;
+  border-color: #d5d5d5;
+  transform: none;
+  box-shadow: none;
+}
+
+.dialog-footer :deep(.el-button--primary) {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.dialog-footer :deep(.el-button--primary:hover) {
+  background: #333333;
+  border-color: #333333;
 }
 
 @media (max-width: 768px) {

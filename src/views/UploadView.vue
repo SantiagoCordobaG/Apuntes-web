@@ -507,24 +507,66 @@ const submitForm = async () => {
 
 <style scoped>
 .upload-view {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .upload-card, .preview-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: uploadCardIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes uploadCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.upload-card:hover, .preview-card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px 0;
 }
 
 .card-header h2 {
   margin: 0;
-  color: #303133;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
 }
 
 .upload-form {
@@ -537,17 +579,36 @@ const submitForm = async () => {
 
 .upload-dragger .el-upload-dragger {
   width: 100%;
-  height: 180px;
-  border: 2px dashed #d9d9d9;
-  border-radius: 6px;
+  height: 200px;
+  border: 2px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(250, 250, 250, 0.6);
+  backdrop-filter: blur(10px);
+  animation: draggerPulse 3s ease-in-out infinite;
+}
+
+@keyframes draggerPulse {
+  0%, 100% {
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    border-color: rgba(0, 0, 0, 0.3);
+  }
 }
 
 .upload-dragger .el-upload-dragger:hover {
-  border-color: #409eff;
+  border-color: #1a1a1a;
+  background: rgba(245, 245, 245, 0.8);
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.upload-dragger .el-upload-dragger:active {
+  transform: scale(0.98);
 }
 
 .el-icon--upload {
@@ -604,6 +665,51 @@ const submitForm = async () => {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  padding-top: 24px;
+  border-top: 2px solid #f1f5f9;
+  margin-top: 24px;
+}
+
+.form-actions :deep(.el-button) {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 12px 28px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-actions :deep(.el-button:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.form-actions :deep(.el-button) {
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+}
+
+.form-actions :deep(.el-button:hover) {
+  background: #f5f5f5;
+  border-color: #d5d5d5;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-actions :deep(.el-button--primary) {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.form-actions :deep(.el-button--primary:hover) {
+  background: #333333;
+  border-color: #333333;
 }
 
 .preview-content {

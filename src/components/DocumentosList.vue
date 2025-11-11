@@ -536,13 +536,58 @@ onMounted(() => {
 
 <style scoped>
 .documents-section {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-card, .documents-card {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: cardSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.search-card {
+  animation-delay: 0.1s;
+}
+
+.documents-card {
+  animation-delay: 0.2s;
+}
+
+.search-card:hover, .documents-card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 .card-header {
@@ -555,7 +600,11 @@ onMounted(() => {
 
 .card-header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
 }
 
 .results-info {
@@ -582,18 +631,70 @@ onMounted(() => {
 
 .documents-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+  padding: 0;
+  background: transparent;
 }
 
 .document-card {
   border-radius: 12px;
-  transition: all 0.3s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: cardFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.document-card:nth-child(1) { animation-delay: 0.1s; }
+.document-card:nth-child(2) { animation-delay: 0.15s; }
+.document-card:nth-child(3) { animation-delay: 0.2s; }
+.document-card:nth-child(4) { animation-delay: 0.25s; }
+.document-card:nth-child(5) { animation-delay: 0.3s; }
+.document-card:nth-child(6) { animation-delay: 0.35s; }
+
+.document-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.01) 100%);
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
 }
 
 .document-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.01);
+}
+
+.document-card:hover::before {
+  opacity: 1;
+}
+
+.document-card:active {
+  transform: translateY(-2px) scale(0.99);
+  transition: all 0.1s ease;
 }
 
 .document-header {
@@ -622,17 +723,22 @@ onMounted(() => {
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: #1a1a1a;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
 }
 
 .document-description {
-  color: #606266;
+  color: #666666;
   font-size: 14px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
 .document-tags {
@@ -649,19 +755,30 @@ onMounted(() => {
 .document-meta {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #909399;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.document-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .document-stats {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding: 10px 0;
-  border-top: 1px solid #ebeef5;
-  border-bottom: 1px solid #ebeef5;
+  margin-bottom: 16px;
+  padding: 14px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(90deg, transparent, #f8fafc, transparent);
 }
 
 .rating-section {
@@ -685,8 +802,90 @@ onMounted(() => {
 
 .document-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
+}
+
+.document-actions :deep(.el-button) {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.document-actions :deep(.el-button:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.document-actions :deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  color: #1a1a1a;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.document-actions :deep(.el-button::before) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.document-actions :deep(.el-button:hover::before) {
+  width: 200px;
+  height: 200px;
+}
+
+.document-actions :deep(.el-button:hover) {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.document-actions :deep(.el-button:active) {
+  transform: translateY(0) scale(0.98);
+}
+
+.document-actions :deep(.el-button--primary) {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.document-actions :deep(.el-button--primary::before) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.document-actions :deep(.el-button--primary:hover) {
+  background: #333333;
+  border-color: #333333;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.document-actions :deep(.el-button--warning) {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1a1a1a;
+}
+
+.document-actions :deep(.el-button--warning:hover) {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .empty-state {

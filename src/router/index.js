@@ -7,6 +7,9 @@ import PerfilView from "@/views/PerfilView.vue";
 import MisDocumentosView from "@/views/MisDocumentosView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegistroView from "@/views/RegistroView.vue";
+import ContactoView from "@/views/ContactoView.vue";
+import TerminosView from "@/views/TerminosView.vue";
+import PrivacidadView from "@/views/PrivacidadView.vue";
 import { useAuthStore } from "@/stores/auth";
 
 const routes = [
@@ -53,6 +56,21 @@ const routes = [
         path: "mis-documentos",
         name: "MisDocumentos",
         component: MisDocumentosView,
+      },
+      {
+        path: "contacto",
+        name: "Contacto",
+        component: ContactoView,
+      },
+      {
+        path: "terminos",
+        name: "Terminos",
+        component: TerminosView,
+      },
+      {
+        path: "privacidad",
+        name: "Privacidad",
+        component: PrivacidadView,
       },
     ],
   },
