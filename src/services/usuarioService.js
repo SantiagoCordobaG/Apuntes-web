@@ -1,65 +1,79 @@
 // Servicio para manejar las operaciones de usuarios
-const API_URL = 'http://localhost:3000/api/usuarios';
+import apiClient from '@/utils/axios';
+import { ENDPOINTS } from '@/config/api';
 
+/**
+ * Obtener un usuario por ID
+ * @param {string} id - ID del usuario
+ * @returns {Promise<Object>} Usuario
+ */
 export async function obtenerUsuario(id) {
-  const response = await fetch(`${API_URL}/${id}`);
-  if (!response.ok) {
-    throw new Error('Error al obtener el usuario');
+  try {
+    const response = await apiClient.get(ENDPOINTS.USUARIOS.BY_ID(id));
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener usuario:', error);
+    throw error;
   }
-  return await response.json();
 }
 
+/**
+ * Obtener todos los usuarios
+ * @returns {Promise<Array>} Lista de usuarios
+ */
 export async function obtenerUsuarios() {
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error('Error al obtener los usuarios');
+  try {
+    const response = await apiClient.get(ENDPOINTS.USUARIOS.BASE);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    throw error;
   }
-  return await response.json();
 }
 
+/**
+ * Crear un nuevo usuario
+ * @param {Object} usuario - Datos del usuario
+ * @returns {Promise<Object>} Usuario creado
+ */
 export async function crearUsuario(usuario) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(usuario),
-  });
-  if (!response.ok) {
-    throw new Error('Error al crear el usuario');
+  try {
+    const response = await apiClient.post(ENDPOINTS.USUARIOS.BASE, usuario);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    throw error;
   }
-  return await response.json();
 }
 
+/**
+ * Actualizar un usuario
+ * @param {string} id - ID del usuario
+ * @param {Object} usuario - Datos actualizados
+ * @returns {Promise<Object>} Usuario actualizado
+ */
 export async function actualizarUsuario(id, usuario) {
-  const token = localStorage.getItem('token');
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-  
-  // Agregar token de autenticación si está disponible
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  try {
+    const response = await apiClient.put(ENDPOINTS.USUARIOS.BY_ID(id), usuario);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    throw error;
   }
-  
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(usuario),
-  });
-  if (!response.ok) {
-    throw new Error('Error al actualizar el usuario');
-  }
-  return await response.json();
 }
 
+/**
+ * Eliminar un usuario
+ * @param {string} id - ID del usuario
+ * @returns {Promise<Object>} Respuesta de confirmación
+ */
 export async function eliminarUsuario(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) {
-    throw new Error('Error al eliminar el usuario');
+  try {
+    const response = await apiClient.delete(ENDPOINTS.USUARIOS.BY_ID(id));
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    throw error;
   }
-  return await response.json();
 }
 

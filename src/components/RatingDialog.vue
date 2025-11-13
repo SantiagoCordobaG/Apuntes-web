@@ -86,6 +86,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { ElMessage } from 'element-plus';
 import { Star } from '@element-plus/icons-vue';
+import { obtenerMiValoracion, valorarDocumento } from '@/services/documentService';
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -147,28 +148,17 @@ const cargarValoracionUsuario = async () => {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/Documentos/${documentId}/my-rating`, {
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`
-      }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data.hasRated) {
-        userRating.value = data;
-        rating.value = data.rating;
-        comment.value = data.comentario || '';
-      } else {
-        // Si no hay valoración previa, resetear
-        userRating.value = null;
-        rating.value = 0;
-        comment.value = '';
-      }
-    } else if (response.status === 401) {
-      // Token inválido o expirado
-      ElMessage.warning('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
-      resetForm();
+    const data = await obtenerMiValoracion(documentId);
+    
+    if (data.hasRated) {
+      userRating.value = data;
+      rating.value = data.rating;
+      comment.value = data.comentario || '';
+    } else {
+      // Si no hay valoración previa, resetear
+      userRating.value = null;
+      rating.value = 0;
+      comment.value = '';
     }
   } catch (error) {
     console.error('Error al cargar valoración:', error);
@@ -206,35 +196,7 @@ const submitRating = async () => {
   try {
     submitting.value = true;
 
-    const response = await fetch(`http://localhost:3000/api/Documentos/${documentId}/rate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: JSON.stringify({
-        rating: ratingValue,  // Usar el valor convertido a número
-        comentario: comment.value || ''
-      })
-    });
-
-    if (!response.ok) {
-      let errorMessage = 'Error al enviar la valoración';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        // Si no se puede parsear el error
-        if (response.status === 401) {
-          errorMessage = 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.';
-        } else if (response.status === 404) {
-          errorMessage = 'Documento no encontrado';
-        }
-      }
-      throw new Error(errorMessage);
-    }
-
-    const data = await response.json();
+    const data = await valorarDocumento(documentId, ratingValue, comment.value || '');
 
     ElMessage.success('¡Gracias por tu valoración!');
     
@@ -259,7 +221,7 @@ const submitRating = async () => {
     }, 1000);
   } catch (error) {
     console.error('Error:', error);
-    ElMessage.error(error.message || 'Error al enviar la valoración');
+    // El mensaje de error ya se maneja en el interceptor de axios
   } finally {
     submitting.value = false;
   }

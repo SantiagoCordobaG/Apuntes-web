@@ -5,6 +5,7 @@ import { upload, cloudinary } from "../config/cloudinary.js";
 import multer from "multer";
 import axios from "axios";
 import { verificarToken } from "../middleware/auth.js";
+import { generarEtiquetasAutomaticas } from "../utils/autoTagging.js";
 
 const router = express.Router();
 
@@ -57,6 +58,25 @@ router.post("/upload", verificarToken, (req, res, next) => {
       author: req.body.author
     });
 
+    // Generar etiquetas automáticas si no se proporcionaron o si están vacías
+    let tags = req.body.tags ? JSON.parse(req.body.tags) : [];
+    
+    // Si no hay etiquetas o hay pocas, generar automáticamente
+    if (tags.length === 0 || tags.length < 2) {
+      const autoTags = generarEtiquetasAutomaticas({
+        fileName: req.file.originalname,
+        title: req.body.title,
+        description: req.body.description
+      });
+      
+      // Combinar etiquetas manuales con automáticas (sin duplicados)
+      const allTags = [...new Set([...tags, ...autoTags])];
+      tags = allTags;
+      
+      console.log("🏷️  Etiquetas automáticas generadas:", autoTags);
+      console.log("🏷️  Etiquetas finales:", tags);
+    }
+
     // Crear documento con la información del archivo
     const nuevoDocumento = new Documento({
       title: req.body.title,
@@ -68,7 +88,7 @@ router.post("/upload", verificarToken, (req, res, next) => {
       fileType: req.file.originalname.split('.').pop().toLowerCase(),
       fileUrl: req.file.path,           // URL completa de Cloudinary
       fileKey: req.file.filename,       // ID único en Cloudinary
-      tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+      tags: tags, // Usar etiquetas combinadas (manuales + automáticas)
       fileSize: (req.file.size / (1024 * 1024)).toFixed(2) + ' MB',
       uploadDate: new Date().toISOString().split('T')[0],
       rating: 0,

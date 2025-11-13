@@ -214,7 +214,7 @@
           </div>
 
           <div class="document-actions">
-            <el-button type="primary" @click="descargarDocumento(doc)">
+            <el-button type="primary" @click="descargarDocumentoHandler(doc)">
               <el-icon><Download /></el-icon>
               Descargar
             </el-button>
@@ -266,6 +266,7 @@ import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Document, Download, View, Search, Refresh, Star } from '@element-plus/icons-vue';
 import RatingDialog from './RatingDialog.vue';
+import { obtenerDocumentos, obtenerDocumentoPorId, descargarDocumento } from '@/services/documentService';
 
 const documentos = ref([]);
 const documentosFiltrados = ref([]);
@@ -291,16 +292,11 @@ const searchForm = ref({
 const cargarDocumentos = async () => {
   loading.value = true;
   try {
-    const res = await fetch("http://localhost:3000/api/Documentos");
-    if (res.ok) {
-      documentos.value = await res.json();
-      aplicarFiltros();
-    } else {
-      ElMessage.error("Error al cargar documentos");
-    }
+    documentos.value = await obtenerDocumentos();
+    aplicarFiltros();
   } catch (err) {
     console.error("Error al cargar documentos:", err);
-    ElMessage.error("Error al cargar documentos. Verifica que el backend esté corriendo.");
+    // El mensaje de error ya se maneja en el interceptor de axios
   } finally {
     loading.value = false;
   }
@@ -412,87 +408,44 @@ const limpiarFiltros = () => {
 
 const verDetalles = async (id) => {
   try {
-    const res = await fetch(`http://localhost:3000/api/Documentos/${id}`);
-    if (res.ok) {
-      documentoSeleccionado.value = await res.json();
-      dialogVisible.value = true;
-    } else {
-      ElMessage.error("Error al cargar detalles");
-    }
+    documentoSeleccionado.value = await obtenerDocumentoPorId(id);
+    dialogVisible.value = true;
   } catch (err) {
-    ElMessage.error("Error al cargar detalles");
+    console.error("Error al cargar detalles:", err);
+    // El mensaje de error ya se maneja en el interceptor de axios
   }
 };
 
-const descargarDocumento = async (doc) => {
+const descargarDocumentoHandler = async (doc) => {
   try {
-    // Llamar al endpoint de descarga
-    const res = await fetch(`http://localhost:3000/api/Documentos/download/${doc._id}`);
+    // Descargar el archivo usando el servicio
+    const blob = await descargarDocumento(doc._id);
     
-    if (!res.ok) {
-      try {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Error al obtener el archivo');
-      } catch (e) {
-        throw new Error('Error al obtener el archivo');
-      }
-    }
-
-    // Verificar si la respuesta es un archivo (binary) o JSON (fallback)
-    const contentType = res.headers.get('content-type');
+    // Crear URL del blob y descargar
+    const url = window.URL.createObjectURL(blob);
     
-    if (contentType && contentType.includes('application/json')) {
-      // Fallback: si el backend devuelve JSON
-      const data = await res.json();
-      const link = document.createElement('a');
-      link.href = data.fileUrl;
-      link.target = '_blank';
-      link.download = data.fileName || doc.fileName;
-      document.body.appendChild(link);
-      link.click();
+    // Obtener el nombre del archivo
+    let fileName = doc.fileName || `documento.${doc.fileType || 'pdf'}`;
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Limpiar
+    setTimeout(() => {
       document.body.removeChild(link);
-    } else {
-      // Descargar el archivo directamente desde el backend
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      // Obtener el nombre del archivo del header Content-Disposition o usar el nombre del documento
-      let fileName = doc.fileName || `documento.${doc.fileType || 'pdf'}`;
-      const contentDisposition = res.headers.get('content-disposition');
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        if (fileNameMatch && fileNameMatch[1]) {
-          fileName = fileNameMatch[1].replace(/['"]/g, '');
-          try {
-            fileName = decodeURIComponent(fileName);
-          } catch (e) {
-            // Si falla la decodificación, usar el nombre tal cual
-          }
-        }
-      }
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      
-      // Limpiar
-      setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }, 100);
-    }
+      window.URL.revokeObjectURL(url);
+    }, 100);
     
     ElMessage.success(`Descargando ${doc.title}`);
     
-    // Actualizar contador localmente y recargar documentos
+    // Actualizar contador localmente
     doc.downloadCount = (doc.downloadCount || 0) + 1;
-    // Opcional: recargar documentos para obtener datos actualizados
-    // cargarDocumentos();
   } catch (error) {
     console.error('Error al descargar:', error);
-    ElMessage.error('Error al descargar el documento: ' + error.message);
+    // El mensaje de error ya se maneja en el interceptor de axios
   }
 };
 

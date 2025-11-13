@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { generarEtiquetasAutomaticas } from '@/services/autoTaggingService';
 
 export const useDocumentsStore = defineStore('documents', () => {
   // Estado
@@ -174,43 +175,14 @@ export const useDocumentsStore = defineStore('documents', () => {
     fileTypeFilter.value = type;
   };
 
-  const generateAutoTags = (fileName) => {
-    // Simulación de etiquetado automático basado en el nombre del archivo
-    const tags = [];
-    const fileNameLower = fileName.toLowerCase();
-    
-    // Etiquetas basadas en palabras clave del nombre
-    const keywordMap = {
-      'matematicas': ['matemáticas', 'cálculo'],
-      'fisica': ['física', 'ciencia'],
-      'historia': ['historia', 'sociales'],
-      'arte': ['arte', 'cultura'],
-      'programacion': ['programación', 'informática'],
-      'quimica': ['química', 'ciencia'],
-      'biologia': ['biología', 'ciencia'],
-      'literatura': ['literatura', 'humanidades'],
-      'economia': ['economía', 'sociales'],
-      'filosofia': ['filosofía', 'humanidades']
-    };
-
-    Object.keys(keywordMap).forEach(keyword => {
-      if (fileNameLower.includes(keyword)) {
-        tags.push(...keywordMap[keyword]);
-      }
+  const generateAutoTags = (fileName, title = '', description = '') => {
+    // Usar el servicio mejorado de etiquetado automático
+    return generarEtiquetasAutomaticas({
+      fileName,
+      title,
+      description,
+      includeKeywords: false // No incluir palabras clave extraídas por defecto
     });
-
-    // Etiquetas por tipo de archivo
-    if (fileNameLower.includes('ejercicios') || fileNameLower.includes('practica')) {
-      tags.push('ejercicios', 'práctica');
-    }
-    if (fileNameLower.includes('examen') || fileNameLower.includes('test')) {
-      tags.push('examen', 'evaluación');
-    }
-    if (fileNameLower.includes('resumen') || fileNameLower.includes('summary')) {
-      tags.push('resumen', 'síntesis');
-    }
-
-    return [...new Set(tags)]; // Eliminar duplicados
   };
 
   return {

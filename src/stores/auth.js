@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import apiClient from '@/utils/axios';
+import { ENDPOINTS } from '@/config/api';
 
 export const useAuthStore = defineStore('auth', () => {
   // Estado
@@ -15,27 +17,16 @@ export const useAuthStore = defineStore('auth', () => {
   const initAuth = async () => {
     if (token.value) {
       try {
-        const res = await fetch('http://localhost:3000/api/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token.value}`
-          }
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          usuario.value = data.usuario;
-          isAuthenticated.value = true;
-          // Actualizar localStorage con la información actualizada
-          localStorage.setItem('usuario', JSON.stringify(data.usuario));
-        } else {
-          // Token inválido, limpiar
-          logout();
-        }
+        const response = await apiClient.get(ENDPOINTS.AUTH.ME);
+        usuario.value = response.data.usuario;
+        isAuthenticated.value = true;
+        // Actualizar localStorage con la información actualizada
+        localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
       } catch (error) {
         console.error('Error al verificar autenticación:', error);
         // Si hay error de conexión, mantener el usuario del localStorage
         // pero marcar como no autenticado si es necesario
-        if (usuario.value) {
+        if (usuario.value && error.response?.status !== 401) {
           isAuthenticated.value = true;
         } else {
           logout();
@@ -49,64 +40,45 @@ export const useAuthStore = defineStore('auth', () => {
   // Login
   const login = async (correo, password) => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ correo, password })
+      const response = await apiClient.post(ENDPOINTS.AUTH.LOGIN, {
+        correo,
+        password
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        usuario.value = data.usuario;
-        token.value = data.token;
-        isAuthenticated.value = true;
-        
-        // Guardar token en localStorage
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-        
-        return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.error || 'Error al hacer login' };
-      }
+      usuario.value = response.data.usuario;
+      token.value = response.data.token;
+      isAuthenticated.value = true;
+      
+      // Guardar token en localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      
+      return { success: true, message: response.data.message || 'Login exitoso' };
     } catch (error) {
       console.error('Error al hacer login:', error);
-      return { success: false, message: 'Error de conexión. Verifica que el backend esté corriendo.' };
+      const errorMessage = error.response?.data?.error || 'Error al hacer login';
+      return { success: false, message: errorMessage };
     }
   };
 
   // Registro
   const registro = async (usuarioData) => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/registro', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(usuarioData)
-      });
+      const response = await apiClient.post(ENDPOINTS.AUTH.REGISTRO, usuarioData);
 
-      const data = await res.json();
-
-      if (res.ok) {
-        usuario.value = data.usuario;
-        token.value = data.token;
-        isAuthenticated.value = true;
-        
-        // Guardar token en localStorage
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-        
-        return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.error || 'Error al registrar usuario' };
-      }
+      usuario.value = response.data.usuario;
+      token.value = response.data.token;
+      isAuthenticated.value = true;
+      
+      // Guardar token en localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      
+      return { success: true, message: response.data.message || 'Registro exitoso' };
     } catch (error) {
       console.error('Error al registrar:', error);
-      return { success: false, message: 'Error de conexión. Verifica que el backend esté corriendo.' };
+      const errorMessage = error.response?.data?.error || 'Error al registrar usuario';
+      return { success: false, message: errorMessage };
     }
   };
 
@@ -126,22 +98,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token.value}`
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        usuario.value = data.usuario;
-        return data.usuario;
-      } else {
-        logout();
-        return null;
-      }
+      const response = await apiClient.get(ENDPOINTS.AUTH.ME);
+      usuario.value = response.data.usuario;
+      return response.data.usuario;
     } catch (error) {
       console.error('Error al obtener usuario actual:', error);
+      if (error.response?.status === 401) {
+        logout();
+      }
       return null;
     }
   };

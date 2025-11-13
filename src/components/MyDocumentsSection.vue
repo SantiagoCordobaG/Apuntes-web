@@ -33,7 +33,7 @@
         </div>
         <div class="documento-actions">
           <button
-            @click="descargarDocumento(doc._id)"
+            @click="descargarDocumentoHandler(doc._id)"
             class="download-button"
           >
             <span class="button-icon">⬇️</span>
@@ -61,6 +61,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { ElMessage, ElButton } from "element-plus";
 import { Upload } from "@element-plus/icons-vue";
+import { obtenerDocumentos, descargarDocumento } from "@/services/documentService";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -100,14 +101,7 @@ const cargarDocumentos = async () => {
       return;
     }
 
-    // Obtener todos los documentos del backend
-    const response = await fetch("http://localhost:3000/api/Documentos");
-    
-    if (!response.ok) {
-      throw new Error("Error al cargar documentos");
-    }
-
-    const todosLosDocumentos = await response.json();
+    const todosLosDocumentos = await obtenerDocumentos();
     
     // Filtrar documentos del usuario actual
     const userId = authStore.usuario._id;
@@ -171,27 +165,14 @@ const cargarDocumentos = async () => {
   }
 };
 
-const descargarDocumento = async (documentoId) => {
+const descargarDocumentoHandler = async (documentoId) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/Documentos/download/${documentoId}`);
+    // Obtener el documento para el nombre del archivo
+    const documento = documentos.value.find(d => d._id === documentoId);
+    const fileName = documento?.fileName || "documento.pdf";
     
-    if (!response.ok) {
-      throw new Error("Error al descargar el documento");
-    }
-
-    // Obtener el nombre del archivo del header o del response
-    const contentDisposition = response.headers.get("Content-Disposition");
-    let fileName = "documento.pdf";
-    
-    if (contentDisposition) {
-      const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
-      if (fileNameMatch) {
-        fileName = decodeURIComponent(fileNameMatch[1]);
-      }
-    }
-
-    // Crear un blob y descargarlo
-    const blob = await response.blob();
+    // Descargar el archivo
+    const blob = await descargarDocumento(documentoId);
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -207,7 +188,7 @@ const descargarDocumento = async (documentoId) => {
     await cargarDocumentos();
   } catch (error) {
     console.error("Error al descargar:", error);
-    ElMessage.error("Error al descargar el documento");
+    // El mensaje de error ya se maneja en el interceptor de axios
   }
 };
 
