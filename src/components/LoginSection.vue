@@ -98,7 +98,7 @@
  * - correo: Correo electrónico del usuario
  * - password: Contraseña del usuario
  * - loading: Indica si se está procesando el login
- * - errorMessage: Mensaje de error a mostrar
+ * - errorMessage: Mensaje de error a mostrarrrrr
  * 
  * FUNCIONES:
  * - handleLogin(): Valida y procesa el inicio de sesión
