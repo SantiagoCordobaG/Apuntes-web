@@ -1,12 +1,30 @@
+/**
+ * ============================================
+ * SERVICIO DE DOCUMENTOS
+ * ============================================
+ * 
+ * Centraliza TODAS las operaciones relacionadas con documentos.
+ * 
+ * VENTAJAS:
+ * - Evita repetir código
+ * - Maneja errores de forma consistente
+ * - El token se agrega automáticamente (gracias a axios interceptor)
+ * 
+ * FUNCIONES:
+ * - obtenerDocumentos(): Obtiene todos los documentos
+ * - obtenerDocumentoPorId(): Obtiene un documento específico
+ * - subirDocumento(): Sube un nuevo documento
+ * - descargarDocumento(): Descarga un documento
+ * - valorarDocumento(): Valora un documento
+ * - obtenerMiValoracion(): Obtiene la valoración del usuario actual
+ * - eliminarDocumento(): Elimina un documento
+ */
+
 import apiClient from '@/utils/axios';
 import { ENDPOINTS } from '@/config/api';
 
 /**
- * Servicio centralizado para operaciones con documentos
- */
-
-/**
- * Obtener todos los documentos
+ * Obtiene todos los documentos disponibles
  * @returns {Promise<Array>} Lista de documentos
  */
 export async function obtenerDocumentos() {
@@ -15,7 +33,7 @@ export async function obtenerDocumentos() {
     return response.data;
   } catch (error) {
     console.error('Error al obtener documentos:', error);
-    throw error;
+    throw error; // El interceptor de axios ya mostró el mensaje de error
   }
 }
 

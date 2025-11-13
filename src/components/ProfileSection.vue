@@ -159,36 +159,25 @@ const modoEdicion = ref(false);
 const cargando = ref(false);
 
 onMounted(async () => {
+  if (!authStore.isAuthenticated || !authStore.token) {
+    ElMessage.warning("Debes iniciar sesión para ver tu perfil");
+    router.push("/login");
+    return;
+  }
   try {
     cargando.value = true;
-    
-    // Verificar si hay un usuario autenticado
-    if (!authStore.isAuthenticated || !authStore.token) {
-      ElMessage.warning("Debes iniciar sesión para ver tu perfil");
-      router.push("/login");
-      return;
-    }
-
-    // Obtener el usuario actual del servidor
     const usuarioActual = await authStore.getUsuarioActual();
-    
-    if (usuarioActual) {
-      user.value = usuarioActual;
-    } else {
-      // Si no se puede obtener, usar el del store (localStorage)
-      if (authStore.usuario) {
-        user.value = authStore.usuario;
-      } else {
-        ElMessage.error("No se pudo cargar el perfil");
-        router.push("/login");
-      }
+    user.value = usuarioActual || authStore.usuario;
+    if (!user.value) {
+      ElMessage.error("No se pudo cargar el perfil");
+      router.push("/login");
     }
   } catch (error) {
     console.error("Error al cargar el perfil:", error);
-    ElMessage.error("Error al cargar el perfil");
-    // Intentar usar el usuario del store como respaldo
-    if (authStore.usuario) {
-      user.value = authStore.usuario;
+    user.value = authStore.usuario;
+    if (!user.value) {
+      ElMessage.error("Error al cargar el perfil");
+      router.push("/login");
     }
   } finally {
     cargando.value = false;
@@ -206,20 +195,16 @@ const cancelarEdicion = () => {
 };
 
 const guardarCambios = async () => {
-  if (!userEdit.value.nombre || !userEdit.value.carrera || !userEdit.value.universidad) {
+  if (!userEdit.value.nombre) {
     ElMessage.warning("Por favor completa todos los campos");
     return;
   }
-
   try {
     cargando.value = true;
     const resultado = await actualizarUsuario(user.value._id, userEdit.value);
     user.value = resultado.usuario;
-    
-    // Actualizar el store de autenticación con los nuevos datos
     authStore.usuario = resultado.usuario;
     localStorage.setItem('usuario', JSON.stringify(resultado.usuario));
-    
     modoEdicion.value = false;
     ElMessage.success("Cambios guardados ✅");
   } catch (error) {
@@ -237,20 +222,7 @@ const guardarCambios = async () => {
   justify-content: center;
   padding: 40px 20px;
   min-height: calc(100vh - 160px);
-  animation: fadeIn 0.5s ease-in;
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .perfil-card {
   width: 100%;
   max-width: 680px;
@@ -259,29 +231,14 @@ const guardarCambios = async () => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: profileCardIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
-
-@keyframes profileCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .perfil-card:hover {
   border-color: rgba(0, 0, 0, 0.12);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   transform: translateY(-4px);
 }
-
 .perfil-header {
   display: flex;
   align-items: flex-start;
@@ -289,48 +246,19 @@ const guardarCambios = async () => {
   padding: 0 0 40px 0;
   margin-bottom: 40px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  animation: headerSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
 }
-
-@keyframes headerSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .avatar-wrapper {
   position: relative;
   flex-shrink: 0;
 }
-
 .profile-avatar {
   border: 4px solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: avatarFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+  transition: transform 0.3s;
 }
-
-@keyframes avatarFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8) rotate(-10deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
 .avatar-wrapper:hover .profile-avatar {
-  transform: scale(1.08) rotate(5deg);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  transform: scale(1.05);
 }
-
 .avatar-badge {
   position: absolute;
   bottom: 4px;
@@ -346,48 +274,16 @@ const guardarCambios = async () => {
   font-size: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border: 3px solid white;
-  animation: badgePulse 2s ease-in-out infinite;
 }
-
-@keyframes badgePulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.perfil-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.info-content {
-  animation: infoFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
-}
-
-@keyframes infoFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+.perfil-info { flex: 1; min-width: 0; }
 
 .perfil-nombre {
   margin: 0 0 12px 0;
   font-weight: 700;
   font-size: 36px;
   color: #1a1a1a;
-  letter-spacing: -1px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  line-height: 1.2;
 }
-
 .perfil-correo {
   color: #666666;
   margin: 0 0 16px 0;
@@ -395,14 +291,8 @@ const guardarCambios = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 400;
 }
-
-.perfil-correo .el-icon {
-  font-size: 18px;
-  color: #999999;
-}
-
+.perfil-correo .el-icon { font-size: 18px; color: #999999; }
 .rol-badge {
   display: inline-flex;
   align-items: center;
@@ -411,139 +301,46 @@ const guardarCambios = async () => {
   border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
-
-.rol-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1a1a1a;
-  letter-spacing: 0.3px;
-}
-
-.edit-input {
-  animation: inputFadeIn 0.4s ease;
-}
-
-@keyframes inputFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+.rol-text { font-size: 13px; font-weight: 600; color: #1a1a1a; }
 .perfil-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   padding-top: 32px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  animation: actionsFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
 }
-
-@keyframes actionsFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .action-button {
   min-width: 140px;
   height: 48px;
   font-size: 14px;
   font-weight: 600;
   border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s;
 }
-
-.action-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.5s ease, height 0.5s ease;
-}
-
-.action-button:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
 .action-button.primary {
   background: #1a1a1a;
   border: 1px solid #1a1a1a;
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
-.action-button.primary::before {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .action-button.primary:hover {
   background: #333333;
-  border-color: #333333;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
-
 .action-button.secondary {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   color: #1a1a1a;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
-
-.action-button.secondary::before {
-  background: rgba(0, 0, 0, 0.1);
-}
-
 .action-button.secondary:hover {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
-.action-button:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.perfil-details {
-  margin-bottom: 40px;
-  animation: detailsFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
-}
-
-@keyframes detailsFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.details-grid {
-  display: grid;
-  gap: 16px;
-}
-
+.perfil-details { margin-bottom: 40px; }
+.details-grid { display: grid; gap: 16px; }
 .detail-item {
   display: flex;
   align-items: center;
@@ -552,31 +349,13 @@ const guardarCambios = async () => {
   background: rgba(0, 0, 0, 0.02);
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: detailItemIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: all 0.3s;
 }
-
-.detail-item:nth-child(1) { animation-delay: 0.1s; }
-.detail-item:nth-child(2) { animation-delay: 0.2s; }
-.detail-item:nth-child(3) { animation-delay: 0.3s; }
-
-@keyframes detailItemIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 .detail-item:hover {
   background: rgba(0, 0, 0, 0.04);
   border-color: rgba(0, 0, 0, 0.08);
   transform: translateX(4px);
 }
-
 .detail-icon {
   width: 48px;
   height: 48px;
@@ -588,37 +367,26 @@ const guardarCambios = async () => {
   color: #1a1a1a;
   font-size: 20px;
   flex-shrink: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
-
 .detail-item:hover .detail-icon {
   background: #1a1a1a;
   color: white;
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.1);
 }
-
-.detail-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
+.detail-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .detail-label {
   font-size: 12px;
   font-weight: 600;
   color: #999999;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
-
 .detail-value {
   font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
 }
-
 .empty-details {
   display: flex;
   flex-direction: column;
@@ -630,42 +398,10 @@ const guardarCambios = async () => {
   border-radius: 16px;
   border: 2px dashed rgba(0, 0, 0, 0.08);
 }
-
-.empty-icon {
-  font-size: 48px;
-  color: #999999;
-  margin-bottom: 16px;
-  animation: iconFloat 3s ease-in-out infinite;
-}
-
-@keyframes iconFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.empty-text {
-  margin: 0;
-  font-size: 14px;
-  color: #666666;
-  font-weight: 400;
-}
-
-.edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+.empty-icon { font-size: 48px; color: #999999; margin-bottom: 16px; }
+.empty-text { margin: 0; font-size: 14px; color: #666666; }
+.edit-form { display: flex; flex-direction: column; gap: 24px; }
+.form-section { display: flex; flex-direction: column; gap: 8px; }
 .form-label {
   display: flex;
   align-items: center;
@@ -674,35 +410,25 @@ const guardarCambios = async () => {
   font-weight: 600;
   color: #666666;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
-
-.form-label .el-icon {
-  font-size: 16px;
-  color: #999999;
-}
-
+.form-label .el-icon { font-size: 16px; color: #999999; }
 .form-input :deep(.el-input__wrapper),
 .form-select :deep(.el-input__wrapper) {
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
-
 .form-input :deep(.el-input__wrapper:hover),
 .form-select :deep(.el-input__wrapper:hover) {
   border-color: rgba(0, 0, 0, 0.15);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 .form-input :deep(.el-input__wrapper.is-focus),
 .form-select :deep(.el-input__wrapper.is-focus) {
   border-color: #1a1a1a;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.95);
 }
 
 @media (max-width: 768px) {

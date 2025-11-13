@@ -1,73 +1,110 @@
+/**
+ * ============================================
+ * CONFIGURACIÓN DE AXIOS
+ * ============================================
+ * 
+ * Crea una instancia de axios configurada con:
+ * - URL base de la API
+ * - Interceptores para agregar token automáticamente
+ * - Manejo global de errores
+ * 
+ * VENTAJAS:
+ * - No necesitas agregar el token manualmente en cada petición
+ * - Los errores se manejan automáticamente
+ * - Si el token expira, redirige automáticamente a login
+ */
+
 import axios from 'axios';
 import { API_URL } from '@/config/api';
 import { ElMessage } from 'element-plus';
 
-// Crear instancia de axios
+// ===== CREAR INSTANCIA DE AXIOS =====
+// Esta instancia se usa para todas las peticiones HTTP
 const apiClient = axios.create({
-  baseURL: API_URL,
-  timeout: 30000, // 30 segundos
+  baseURL: API_URL,        // URL base: http://localhost:3000/api
+  timeout: 30000,          // Timeout de 30 segundos
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json' // Por defecto envía JSON
   }
 });
 
-// Interceptor de solicitudes: agregar token automáticamente
+/**
+ * ===== INTERCEPTOR DE SOLICITUDES =====
+ * Se ejecuta ANTES de cada petición HTTP
+ * 
+ * FUNCIÓN: Agrega el token JWT automáticamente al header Authorization
+ */
 apiClient.interceptors.request.use(
   (config) => {
-    // Obtener token del localStorage
+    // Obtener el token del localStorage
     const token = localStorage.getItem('token');
     
+    // Si hay token, agregarlo al header
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    return config;
+    return config; // Continuar con la petición
   },
   (error) => {
     return Promise.reject(error);
   }
 );
 
-// Interceptor de respuestas: manejar errores globalmente
+/**
+ * ===== INTERCEPTOR DE RESPUESTAS =====
+ * Se ejecuta DESPUÉS de cada respuesta HTTP
+ * 
+ * FUNCIÓN: Maneja errores globalmente y muestra mensajes al usuario
+ */
 apiClient.interceptors.response.use(
-  (response) => {
-    // Si la respuesta es exitosa, devolverla tal cual
-    return response;
-  },
+  // Si la respuesta es exitosa → devolverla tal cual
+  (response) => response,
+  
+  // Si hay un error → manejarlo
   (error) => {
-    // Manejar errores de respuesta
     if (error.response) {
+      // El servidor respondió con un error
       const { status, data } = error.response;
       
-      // Token expirado o inválido
+      // ===== ERROR 401: Token inválido o expirado =====
       if (status === 401) {
-        // Limpiar token y redirigir al login
+        // Limpiar datos de autenticación
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
         
-        // Solo mostrar mensaje si no estamos en la página de login
+        // Solo mostrar mensaje si no estamos en login
         if (!window.location.pathname.includes('/login')) {
           ElMessage.warning('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
-          // Redirigir al login
-          window.location.href = '/login';
+          window.location.href = '/login'; // Redirigir a login
         }
-      } else if (status === 403) {
+      } 
+      // ===== ERROR 403: Sin permisos =====
+      else if (status === 403) {
         ElMessage.error('No tienes permisos para realizar esta acción');
-      } else if (status === 404) {
+      } 
+      // ===== ERROR 404: No encontrado =====
+      else if (status === 404) {
         ElMessage.error('Recurso no encontrado');
-      } else if (status >= 500) {
+      } 
+      // ===== ERROR 500+: Error del servidor =====
+      else if (status >= 500) {
         ElMessage.error('Error del servidor. Por favor intenta más tarde');
-      } else if (data && data.error) {
-        // Mostrar mensaje de error del servidor
-        ElMessage.error(data.error);
+      } 
+      // ===== OTROS ERRORES =====
+      else if (data && data.error) {
+        ElMessage.error(data.error); // Mostrar mensaje del servidor
       } else {
         ElMessage.error('Ocurrió un error inesperado');
       }
-    } else if (error.request) {
-      // Error de red (sin respuesta del servidor)
+    } 
+    // ===== ERROR DE RED =====
+    // El servidor no respondió (no está corriendo, sin internet, etc.)
+    else if (error.request) {
       ElMessage.error('No se pudo conectar con el servidor. Verifica tu conexión o que el backend esté corriendo.');
-    } else {
-      // Error al configurar la solicitud
+    } 
+    // ===== ERROR AL CONFIGURAR LA PETICIÓN =====
+    else {
       ElMessage.error('Error al procesar la solicitud');
     }
     

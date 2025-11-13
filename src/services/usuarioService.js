@@ -1,79 +1,49 @@
-// Servicio para manejar las operaciones de usuarios
 import apiClient from '@/utils/axios';
 import { ENDPOINTS } from '@/config/api';
 
-/**
- * Obtener un usuario por ID
- * @param {string} id - ID del usuario
- * @returns {Promise<Object>} Usuario
- */
+// Helper para manejar errores
+const handleError = (error, operation) => {
+  console.error(`Error al ${operation}:`, error);
+  throw error;
+};
+
 export async function obtenerUsuario(id) {
   try {
-    const response = await apiClient.get(ENDPOINTS.USUARIOS.BY_ID(id));
-    return response.data;
+    return (await apiClient.get(ENDPOINTS.USUARIOS.BY_ID(id))).data;
   } catch (error) {
-    console.error('Error al obtener usuario:', error);
-    throw error;
+    handleError(error, 'obtener usuario');
   }
 }
 
-/**
- * Obtener todos los usuarios
- * @returns {Promise<Array>} Lista de usuarios
- */
 export async function obtenerUsuarios() {
   try {
-    const response = await apiClient.get(ENDPOINTS.USUARIOS.BASE);
-    return response.data;
+    return (await apiClient.get(ENDPOINTS.USUARIOS.BASE)).data;
   } catch (error) {
-    console.error('Error al obtener usuarios:', error);
-    throw error;
+    handleError(error, 'obtener usuarios');
   }
 }
 
-/**
- * Crear un nuevo usuario
- * @param {Object} usuario - Datos del usuario
- * @returns {Promise<Object>} Usuario creado
- */
 export async function crearUsuario(usuario) {
   try {
-    const response = await apiClient.post(ENDPOINTS.USUARIOS.BASE, usuario);
-    return response.data;
+    return (await apiClient.post(ENDPOINTS.USUARIOS.BASE, usuario)).data;
   } catch (error) {
-    console.error('Error al crear usuario:', error);
-    throw error;
+    handleError(error, 'crear usuario');
   }
 }
 
-/**
- * Actualizar un usuario
- * @param {string} id - ID del usuario
- * @param {Object} usuario - Datos actualizados
- * @returns {Promise<Object>} Usuario actualizado
- */
 export async function actualizarUsuario(id, usuario) {
   try {
-    const response = await apiClient.put(ENDPOINTS.USUARIOS.BY_ID(id), usuario);
-    return response.data;
+    return (await apiClient.put(ENDPOINTS.USUARIOS.BY_ID(id), usuario)).data;
   } catch (error) {
-    console.error('Error al actualizar usuario:', error);
-    throw error;
+    handleError(error, 'actualizar usuario');
   }
 }
 
-/**
- * Eliminar un usuario
- * @param {string} id - ID del usuario
- * @returns {Promise<Object>} Respuesta de confirmación
- */
 export async function eliminarUsuario(id) {
   try {
-    const response = await apiClient.delete(ENDPOINTS.USUARIOS.BY_ID(id));
-    return response.data;
+    return (await apiClient.delete(ENDPOINTS.USUARIOS.BY_ID(id))).data;
   } catch (error) {
-    console.error('Error al eliminar usuario:', error);
-    throw error;
+    handleError(error, 'eliminar usuario');
   }
 }
 

@@ -3,38 +3,8 @@ import { ref, computed } from 'vue';
 import { generarEtiquetasAutomaticas } from '@/services/autoTaggingService';
 
 export const useDocumentsStore = defineStore('documents', () => {
-  // Estado
-  const documents = ref([
-    {
-      id: 2,
-      title: 'Historia del Arte Moderno',
-      description: 'Movimientos artísticos del siglo XX',
-      fileName: 'historia_arte_moderno.docx',
-      fileType: 'docx',
-      uploadDate: '2024-01-14',
-      author: 'Dra. Martínez',
-      tags: ['arte', 'historia', 'modernismo'],
-      rating: 4.2,
-      ratingCount: 18,
-      fileSize: '1.8 MB',
-      downloadCount: 89
-    },
-    {
-      id: 3,
-      title: 'Física Cuántica Básica',
-      description: 'Introducción a la mecánica cuántica',
-      fileName: 'fisica_cuantica.pdf',
-      fileType: 'pdf',
-      uploadDate: '2024-01-13',
-      author: 'Dr. López',
-      tags: ['física', 'cuántica', 'ciencia'],
-      rating: 4.8,
-      ratingCount: 31,
-      fileSize: '3.1 MB',
-      downloadCount: 203
-    }
-  ]);
-
+  // Estado (los documentos se cargan desde el backend)
+  const documents = ref([]);
   const searchQuery = ref('');
   const selectedTags = ref([]);
   const sortBy = ref('uploadDate');
@@ -114,9 +84,9 @@ export const useDocumentsStore = defineStore('documents', () => {
 
   const statistics = computed(() => {
     const totalDocs = documents.value.length;
-    const totalDownloads = documents.value.reduce((sum, doc) => sum + doc.downloadCount, 0);
-    const avgRating = documents.value.reduce((sum, doc) => sum + doc.rating, 0) / totalDocs;
-    
+    if (totalDocs === 0) return { totalDocuments: 0, totalDownloads: 0, averageRating: '0.0', totalTags: 0 };
+    const totalDownloads = documents.value.reduce((sum, doc) => sum + (doc.downloadCount || 0), 0);
+    const avgRating = documents.value.reduce((sum, doc) => sum + (doc.rating || 0), 0) / totalDocs;
     return {
       totalDocuments: totalDocs,
       totalDownloads,
@@ -126,53 +96,28 @@ export const useDocumentsStore = defineStore('documents', () => {
   });
 
   // Acciones
+  const setDocuments = (docs) => {
+    documents.value = docs;
+  };
+
   const addDocument = (document) => {
-    const newDoc = {
-      id: Date.now(),
-      ...document,
-      uploadDate: new Date().toISOString().split('T')[0],
-      rating: 0,
-      ratingCount: 0,
-      downloadCount: 0
-    };
-    documents.value.unshift(newDoc);
-    return newDoc;
+    documents.value.unshift(document);
   };
 
   const updateDocumentRating = (documentId, rating) => {
-    const doc = documents.value.find(d => d.id === documentId);
+    const doc = documents.value.find(d => d._id === documentId || d.id === documentId);
     if (doc) {
-      const totalRating = doc.rating * doc.ratingCount;
-      doc.ratingCount += 1;
+      const totalRating = (doc.rating || 0) * (doc.ratingCount || 0);
+      doc.ratingCount = (doc.ratingCount || 0) + 1;
       doc.rating = (totalRating + rating) / doc.ratingCount;
     }
   };
 
   const incrementDownloadCount = (documentId) => {
-    const doc = documents.value.find(d => d.id === documentId);
+    const doc = documents.value.find(d => d._id === documentId || d.id === documentId);
     if (doc) {
-      doc.downloadCount += 1;
+      doc.downloadCount = (doc.downloadCount || 0) + 1;
     }
-  };
-
-  const setSearchQuery = (query) => {
-    searchQuery.value = query;
-  };
-
-  const setSelectedTags = (tags) => {
-    selectedTags.value = tags;
-  };
-
-  const setSortBy = (sort) => {
-    sortBy.value = sort;
-  };
-
-  const setSortOrder = (order) => {
-    sortOrder.value = order;
-  };
-
-  const setFileTypeFilter = (type) => {
-    fileTypeFilter.value = type;
   };
 
   const generateAutoTags = (fileName, title = '', description = '') => {
@@ -193,21 +138,15 @@ export const useDocumentsStore = defineStore('documents', () => {
     sortBy,
     sortOrder,
     fileTypeFilter,
-    
     // Getters
     filteredDocuments,
     allTags,
     statistics,
-    
     // Acciones
+    setDocuments,
     addDocument,
     updateDocumentRating,
     incrementDownloadCount,
-    setSearchQuery,
-    setSelectedTags,
-    setSortBy,
-    setSortOrder,
-    setFileTypeFilter,
     generateAutoTags
   };
 });

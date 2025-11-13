@@ -7,12 +7,14 @@ Apuntes-web/
 ├── backend/                 # Servidor backend (Node.js/Express)
 ├── public/                  # Archivos estáticos públicos
 ├── src/                     # Código fuente del frontend
-│   ├── assets/             # Recursos estáticos (vacía - opcional mantener por convención)
+│   ├── assets/             # Recursos estáticos (vacía - no se usan recursos locales)
 │   ├── components/         # Componentes Vue reutilizables (11 componentes)
+│   ├── config/             # Configuración (api.js - endpoints centralizados)
 │   ├── layouts/            # Layouts de la aplicación (1 layout)
 │   ├── router/             # Configuración de rutas
-│   ├── services/           # Servicios para llamadas a API (1 servicio)
+│   ├── services/           # Servicios para llamadas a API (3 servicios)
 │   ├── stores/             # Stores de Pinia (gestión de estado) (2 stores)
+│   ├── utils/              # Utilidades (axios.js - cliente HTTP configurado)
 │   ├── views/              # Vistas principales de la aplicación (2 vistas)
 │   ├── App.vue             # Componente raíz de la aplicación
 │   └── main.js             # Punto de entrada de la aplicación
@@ -162,15 +164,37 @@ La aplicación sigue una arquitectura modular y organizada:
 
 ### **`src/stores/documents.js`**
 - **Estado:**
-  - `documents`: Lista de documentos (datos de ejemplo)
+  - `documents`: Lista de documentos (cargados desde el backend)
+  - `searchQuery`: Texto de búsqueda
+  - `selectedTags`: Etiquetas seleccionadas para filtrar
+  - `sortBy`: Campo de ordenamiento
+  - `sortOrder`: Orden (asc/desc)
+  - `fileTypeFilter`: Filtro por tipo de archivo
+
+- **Getters:**
+  - `filteredDocuments`: Documentos filtrados y ordenados
+  - `allTags`: Todas las etiquetas disponibles
+  - `statistics`: Estadísticas de documentos
 
 - **Acciones:**
-  - `generateAutoTags(fileName)`: Genera etiquetas automáticas basadas en el nombre del archivo
-  - Funciones auxiliares para manejo de documentos
+  - `setDocuments(docs)`: Establece la lista de documentos
+  - `addDocument(document)`: Agrega un documento
+  - `updateDocumentRating(id, rating)`: Actualiza valoración
+  - `incrementDownloadCount(id)`: Incrementa contador de descargas
+  - `generateAutoTags(fileName, title, description)`: Genera etiquetas automáticas
 
 ---
 
 ## 🔌 Servicios (API Calls)
+
+### **`src/services/documentService.js`**
+- `obtenerDocumentos()`: Obtiene todos los documentos
+- `obtenerDocumentoPorId(id)`: Obtiene un documento específico
+- `subirDocumento(formData)`: Sube un nuevo documento
+- `descargarDocumento(id)`: Descarga un documento
+- `valorarDocumento(id, rating, comentario)`: Valora un documento
+- `obtenerMiValoracion(id)`: Obtiene la valoración del usuario actual
+- `eliminarDocumento(id)`: Elimina un documento
 
 ### **`src/services/usuarioService.js`**
 - `obtenerUsuario(id)`: Obtiene un usuario por ID
@@ -179,7 +203,23 @@ La aplicación sigue una arquitectura modular y organizada:
 - `actualizarUsuario(id, usuario)`: Actualiza información de usuario
 - `eliminarUsuario(id)`: Elimina un usuario
 
-**Nota:** `documentServices.js` fue eliminado ya que no se estaba utilizando. Las llamadas a la API de documentos se realizan directamente en los componentes.
+### **`src/services/autoTaggingService.js`**
+- `generarEtiquetasAutomaticas({ fileName, title, description })`: Genera etiquetas automáticas basadas en el contenido
+- Analiza áreas de conocimiento, tipos de documento y niveles académicos
+- Detecta idioma y material de estudio
+
+## 🛠️ Utilidades y Configuración
+
+### **`src/utils/axios.js`**
+- Cliente HTTP configurado con interceptores
+- Agrega token JWT automáticamente a las peticiones
+- Manejo global de errores con mensajes al usuario
+- Redirección automática a login si el token expira
+
+### **`src/config/api.js`**
+- Configuración centralizada de endpoints
+- URL base de la API desde variables de entorno
+- Todos los endpoints organizados por categoría (AUTH, DOCUMENTOS, USUARIOS)
 
 ---
 
@@ -269,9 +309,9 @@ npm run lint
 
 ### **Nota sobre `src/assets/`:**
 - **Estado actual:** Carpeta vacía
-- **Uso actual:** No se utilizan imágenes locales (las imágenes QR son URLs externas)
-- **Recomendación:** Mantener la carpeta vacía por convención de Vue, o agregar un logo personalizado si se desea
-- **Opción:** Se puede eliminar si no se planea usar recursos estáticos locales
+- **Uso actual:** No se utilizan recursos estáticos locales (imágenes, fuentes, etc.)
+- **Recomendación:** Se puede mantener vacía por convención de Vue, o eliminar si no se planea usar
+- **Alternativa:** Si se necesita agregar un logo o imágenes, esta es la carpeta adecuada
 
 ### **Estructura de Tabs:**
 - La aplicación usa query parameters (`?tab=nombre`) para navegación
@@ -291,11 +331,13 @@ npm run lint
 ## 🔄 Flujo de Datos
 
 1. **Usuario interactúa** con un componente
-2. **Componente** llama a store de Pinia o hace fetch directo a API
-3. **Store/API** procesa la solicitud
-4. **Estado se actualiza** en Pinia
-5. **Componente se re-renderiza** con nuevos datos
-6. **UI se actualiza** automáticamente (reactividad de Vue)
+2. **Componente** llama a un servicio (`documentService.js`, `usuarioService.js`)
+3. **Servicio** usa `apiClient` (axios configurado) que agrega token automáticamente
+4. **Backend** procesa la solicitud y devuelve respuesta
+5. **Interceptor de axios** maneja errores globalmente
+6. **Servicio** devuelve datos al componente
+7. **Componente** actualiza estado local o store de Pinia
+8. **UI se re-renderiza** automáticamente (reactividad de Vue)
 
 ---
 
@@ -345,6 +387,7 @@ npm run lint
 ### **`vue.config.js`:**
 - Proxy configurado para `/api` → `http://localhost:3000`
 - Transpilación de dependencias habilitada
+- Feature flags de Vue 3 configurados (DefinePlugin)
 
 ### **`jsconfig.json`:**
 - Alias `@/*` → `src/*`
@@ -363,5 +406,13 @@ Para preguntas o problemas, consultar la sección de Contacto en la aplicación 
 ---
 
 **Última actualización:** Enero 2025
-**Versión:** 0.1.0
+**Versión:** 0.2.0
+
+### **Mejoras Recientes:**
+- ✅ Servicios centralizados para documentos y usuarios
+- ✅ Configuración centralizada de API y endpoints
+- ✅ Axios con interceptores para manejo automático de tokens y errores
+- ✅ Etiquetado automático de documentos (frontend y backend)
+- ✅ Código simplificado y optimizado (menos líneas, misma funcionalidad)
+- ✅ Documentación mejorada y actualizada
 

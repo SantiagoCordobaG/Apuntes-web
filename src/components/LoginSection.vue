@@ -1,3 +1,20 @@
+<!--
+  ============================================
+  COMPONENTE: LoginSection
+  ============================================
+  
+  Formulario de inicio de sesión para usuarios existentes.
+  
+  FUNCIONALIDAD:
+  - Valida credenciales (correo y contraseña)
+  - Inicia sesión usando el store de autenticación
+  - Muestra mensajes de error si falla
+  - Redirige al usuario después de login exitoso
+  - Permite cambiar a la vista de registro
+  
+  EVENTOS:
+  - @switch-tab: Emite evento para cambiar al tab de registro
+-->
 <template>
   <div class="login-container">
     <div class="login-card">
@@ -70,45 +87,78 @@
 </template>
 
 <script setup>
+/**
+ * ============================================
+ * COMPONENTE: LoginSection
+ * ============================================
+ * 
+ * Formulario de inicio de sesión.
+ * 
+ * ESTADO:
+ * - correo: Correo electrónico del usuario
+ * - password: Contraseña del usuario
+ * - loading: Indica si se está procesando el login
+ * - errorMessage: Mensaje de error a mostrar
+ * 
+ * FUNCIONES:
+ * - handleLogin(): Valida y procesa el inicio de sesión
+ */
+
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { ElMessage } from 'element-plus';
 import { Document, Message, Lock } from '@element-plus/icons-vue';
 
+// ===== EMITIR EVENTOS =====
+// Permite comunicarse con el componente padre (AuthView)
 // eslint-disable-next-line no-undef
 defineEmits(['switch-tab']);
 
+// ===== INICIALIZACIÓN =====
 const router = useRouter();
 const authStore = useAuthStore();
 
+// ===== ESTADO REACTIVO =====
 const correo = ref('');
 const password = ref('');
 const loading = ref(false);
 const errorMessage = ref('');
 
+/**
+ * Maneja el proceso de inicio de sesión
+ * 
+ * PROCESO:
+ * 1. Valida que los campos no estén vacíos
+ * 2. Llama al store de autenticación para hacer login
+ * 3. Si es exitoso → muestra mensaje y redirige
+ * 4. Si falla → muestra mensaje de error
+ */
 const handleLogin = async () => {
   errorMessage.value = '';
   
+  // Validar campos obligatorios
   if (!correo.value || !password.value) {
     errorMessage.value = 'Por favor, completa todos los campos obligatorios';
     return;
   }
-
+  
   loading.value = true;
-
   try {
+    // Intentar iniciar sesión
     const result = await authStore.login(correo.value, password.value);
-
+    
     if (result.success) {
+      // Login exitoso → mostrar mensaje y redirigir
       ElMessage.success(`¡Bienvenido, ${authStore.usuario?.nombre}! 👋`);
-      // Redirigir a la ruta que se intentó acceder antes del login, o al dashboard
-      const redirect = router.currentRoute.value.query.redirect || '/';
-      router.push(redirect);
+      // Redirigir a la ruta que se intentó acceder antes, o al home
+      router.push(router.currentRoute.value.query.redirect || '/');
     } else {
+      // Login fallido → mostrar error
       errorMessage.value = result.message;
     }
   } catch (error) {
+    // Error inesperado
     errorMessage.value = 'Error al iniciar sesión. Por favor, intenta de nuevo.';
     console.error('Error en login:', error);
   } finally {
@@ -118,53 +168,9 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.login-container {
-  width: 100%;
-  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.login-background {
-  display: none;
-}
-
-.login-card {
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  width: 100%;
-  max-width: 100%;
-  box-shadow: none;
-  border: none;
-  position: relative;
-  z-index: 1;
-  animation: cardSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes cardSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
+.login-container { width: 100%; }
+.login-card { background: transparent; padding: 0; width: 100%; }
+.login-header { text-align: center; margin-bottom: 32px; }
 .logo-wrapper {
   display: inline-flex;
   align-items: center;
@@ -175,123 +181,36 @@ const handleLogin = async () => {
   border-radius: 14px;
   margin-bottom: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: logoFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+  transition: transform 0.3s;
 }
-
-@keyframes logoFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8) rotate(-10deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.logo-wrapper:hover {
-  transform: scale(1.05) rotate(5deg);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.logo-icon {
-  font-size: 28px;
-  color: white;
-}
-
+.logo-wrapper:hover { transform: scale(1.05); }
+.logo-icon { font-size: 28px; color: white; }
 .login-title {
   font-size: 32px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 8px 0;
-  letter-spacing: -0.8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  animation: titleFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
 }
-
-@keyframes titleFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-subtitle {
-  font-size: 15px;
-  color: #666666;
-  margin: 0;
-  font-weight: 400;
-  animation: subtitleFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
-}
-
-@keyframes subtitleFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-form {
-  margin-top: 40px;
-  animation: formFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
-}
-
-@keyframes formFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-form :deep(.el-form-item) {
-  margin-bottom: 20px;
-}
-
+.login-subtitle { font-size: 15px; color: #666666; margin: 0; }
+.login-form { margin-top: 40px; }
+.login-form :deep(.el-form-item) { margin-bottom: 20px; }
 .custom-input :deep(.el-input__wrapper) {
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
-
 .custom-input :deep(.el-input__wrapper:hover) {
   border-color: rgba(0, 0, 0, 0.15);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 .custom-input :deep(.el-input__wrapper.is-focus) {
   border-color: #1a1a1a;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.95);
 }
-
-.error-alert {
-  margin-bottom: 20px;
-  border-radius: 12px;
-  animation: shake 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  75% { transform: translateX(8px); }
-}
-
+.error-alert { margin-bottom: 20px; border-radius: 12px; }
 .login-button {
   width: 100%;
   height: 52px;
@@ -301,73 +220,24 @@ const handleLogin = async () => {
   background: #1a1a1a;
   border: 1px solid #1a1a1a;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
   margin-top: 8px;
-  position: relative;
-  overflow: hidden;
 }
-
-.login-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.5s ease, height 0.5s ease;
-}
-
-.login-button:hover::before {
-  width: 400px;
-  height: 400px;
-}
-
 .login-button:hover {
   background: #333333;
-  border-color: #333333;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
-
-.login-button:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.login-footer {
-  margin-top: 32px;
-  text-align: center;
-  animation: footerFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.7s both;
-}
-
-@keyframes footerFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.footer-text {
-  font-size: 14px;
-  color: #666666;
-  margin: 0;
-  font-weight: 400;
-}
-
+.login-footer { margin-top: 32px; text-align: center; }
+.footer-text { font-size: 14px; color: #666666; margin: 0; }
 .register-link {
   color: #1a1a1a;
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
   position: relative;
 }
-
 .register-link::after {
   content: '';
   position: absolute;
@@ -376,34 +246,12 @@ const handleLogin = async () => {
   width: 0;
   height: 2px;
   background: #1a1a1a;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s;
 }
-
-.register-link:hover::after {
-  width: 100%;
-}
-
-.register-link:hover {
-  color: #1a1a1a;
-}
-
+.register-link:hover::after { width: 100%; }
 @media (max-width: 480px) {
-  .login-card {
-    padding: 40px 32px;
-    border-radius: 20px;
-  }
-
-  .login-title {
-    font-size: 28px;
-  }
-
-  .logo-wrapper {
-    width: 52px;
-    height: 52px;
-  }
-
-  .logo-icon {
-    font-size: 24px;
-  }
+  .login-title { font-size: 28px; }
+  .logo-wrapper { width: 52px; height: 52px; }
+  .logo-icon { font-size: 24px; }
 }
 </style>

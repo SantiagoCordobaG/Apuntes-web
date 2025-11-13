@@ -1,30 +1,50 @@
-// Configuración de la API
-// Usa variables de entorno si están disponibles, sino usa valores por defecto
-// Vue CLI usa process.env, no import.meta.env
-const API_BASE_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-const API_PREFIX = '/api';
+/**
+ * ============================================
+ * CONFIGURACIÓN DE LA API
+ * ============================================
+ * 
+ * Define la URL base de la API y todos los endpoints.
+ * 
+ * IMPORTANTE: Vue CLI usa process.env, no import.meta.env
+ * 
+ * Si quieres cambiar la URL del backend, crea un archivo .env con:
+ * VUE_APP_API_URL=http://tu-servidor.com
+ */
 
+// URL base del backend (usa variable de entorno si existe, sino localhost:3000)
+const API_BASE_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+const API_PREFIX = '/api'; // Prefijo común para todas las rutas
+
+// URL completa de la API
 export const API_URL = `${API_BASE_URL}${API_PREFIX}`;
 export const API_BASE = API_BASE_URL;
 
-// Endpoints específicos
+/**
+ * ===== ENDPOINTS =====
+ * Todas las rutas de la API organizadas por categoría
+ */
 export const ENDPOINTS = {
+  // Rutas de autenticación
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTRO: '/auth/registro',
-    ME: '/auth/me'
+    LOGIN: '/auth/login',           // POST - Iniciar sesión
+    REGISTRO: '/auth/registro',     // POST - Registrar usuario
+    ME: '/auth/me'                  // GET - Obtener usuario actual
   },
+  
+  // Rutas de documentos
   DOCUMENTOS: {
-    BASE: '/Documentos',
-    UPLOAD: '/Documentos/upload',
-    DOWNLOAD: (id) => `/Documentos/download/${id}`,
-    RATE: (id) => `/Documentos/${id}/rate`,
-    MY_RATING: (id) => `/Documentos/${id}/my-rating`,
-    BY_ID: (id) => `/Documentos/${id}`
+    BASE: '/Documentos',                                    // GET - Obtener todos
+    UPLOAD: '/Documentos/upload',                          // POST - Subir documento
+    DOWNLOAD: (id) => `/Documentos/download/${id}`,       // GET - Descargar documento
+    RATE: (id) => `/Documentos/${id}/rate`,                // POST - Valorar documento
+    MY_RATING: (id) => `/Documentos/${id}/my-rating`,      // GET - Mi valoración
+    BY_ID: (id) => `/Documentos/${id}`                    // GET - Obtener por ID
   },
+  
+  // Rutas de usuarios
   USUARIOS: {
-    BASE: '/usuarios',
-    BY_ID: (id) => `/usuarios/${id}`
+    BASE: '/usuarios',                    // GET - Obtener todos
+    BY_ID: (id) => `/usuarios/${id}`      // GET/PUT/DELETE - Operaciones por ID
   }
 };
 
