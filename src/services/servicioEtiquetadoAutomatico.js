@@ -1,6 +1,25 @@
 /**
- * Servicio de Etiquetado Automático de Documentos
- * Analiza el nombre del archivo, título y descripción para generar etiquetas relevantes
+ * ============================================
+ * SERVICIO DE ETIQUETADO AUTOMÁTICO
+ * ============================================
+ * 
+ * DESCRIPCIÓN:
+ * Analiza el nombre del archivo, título y descripción de un documento para generar
+ * etiquetas relevantes automáticamente. Usa diccionarios de palabras clave para
+ * identificar áreas de conocimiento, tipos de documentos y niveles académicos.
+ * 
+ * QUÉ HACE:
+ * - Analiza el nombre del archivo, título y descripción del documento
+ * - Identifica el área de conocimiento (matemáticas, física, programación, etc.)
+ * - Identifica el tipo de documento (ejercicios, examen, resumen, teoría, guía, etc.)
+ * - Identifica el nivel académico (básico, intermedio, avanzado)
+ * - Genera etiquetas relevantes basadas en estos análisis
+ * - Opcionalmente extrae palabras clave significativas del texto
+ * 
+ * EJEMPLO:
+ * Si el archivo se llama "ejercicios_calculo_diferencial.pdf" y el título es
+ * "Ejercicios de Cálculo Diferencial Nivel Intermedio", generará etiquetas como:
+ * ["matemáticas", "cálculo", "ejercicios", "práctica", "intermedio"]
  */
 
 // Diccionario de palabras clave por área de conocimiento

@@ -3,17 +3,27 @@
  * PUNTO DE ENTRADA DE LA APLICACIÓN
  * ============================================
  * 
- * Este archivo es el PRIMERO que se ejecuta cuando la app se carga.
- * Su función es inicializar Vue y todos sus plugins.
+ * DESCRIPCIÓN:
+ * Este archivo es el PRIMERO que se ejecuta cuando la aplicación se carga en el navegador.
+ * Es el punto de entrada principal que inicializa Vue y todos sus plugins.
+ * 
+ * QUÉ HACE:
+ * - Crea la aplicación Vue
+ * - Configura Pinia (gestión de estado global)
+ * - Configura Vue Router (navegación entre vistas)
+ * - Configura Element Plus (componentes UI)
+ * - Verifica autenticación antes de montar la app
+ * - Monta la aplicación en el DOM (div#app en index.html)
  */
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
+import './assets/styles/global.css';
 import App from './App.vue';
 import router from './router';
-import { useAuthStore } from './stores/auth';
+import { useAuthStore } from './stores/autenticacion';
 
 // 1. Crear la aplicación Vue
 const app = createApp(App);

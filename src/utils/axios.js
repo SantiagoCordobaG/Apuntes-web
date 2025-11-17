@@ -1,16 +1,24 @@
 /**
  * ============================================
- * CONFIGURACIÓN DE AXIOS
+ * CONFIGURACIÓN DE AXIOS (Cliente HTTP)
  * ============================================
  * 
- * Crea una instancia de axios configurada con:
- * - URL base de la API
- * - Interceptores para agregar token automáticamente
- * - Manejo global de errores
+ * DESCRIPCIÓN:
+ * Crea una instancia de axios configurada específicamente para esta aplicación.
+ * Incluye interceptores que agregan automáticamente el token JWT y manejan errores
+ * de forma centralizada.
+ * 
+ * QUÉ HACE:
+ * - Configura la URL base de la API (http://localhost:3000/api)
+ * - Agrega el token JWT automáticamente en el header Authorization de cada petición
+ * - Maneja errores globalmente (401, 403, 404, 500, etc.)
+ * - Redirige a login si el token expira o es inválido
+ * - Muestra mensajes de error amigables al usuario
+ * - Maneja errores de conexión (servidor no disponible, sin internet, etc.)
  * 
  * VENTAJAS:
  * - No necesitas agregar el token manualmente en cada petición
- * - Los errores se manejan automáticamente
+ * - Los errores se manejan automáticamente y de forma consistente
  * - Si el token expira, redirige automáticamente a login
  */
 

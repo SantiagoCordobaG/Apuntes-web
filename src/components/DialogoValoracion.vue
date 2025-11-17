@@ -81,12 +81,29 @@
   </el-dialog>
 </template>
 
+<!--
+  ============================================
+  COMPONENTE: DialogoValoracion
+  ============================================
+  
+  DESCRIPCIÓN:
+  Diálogo modal que permite a los usuarios valorar un documento con estrellas (1-5) y
+  agregar un comentario opcional. Muestra la valoración actual del documento.
+  
+  QUÉ HACE:
+  - Permite seleccionar una valoración de 1 a 5 estrellas
+  - Permite agregar un comentario opcional sobre el documento
+  - Muestra la valoración actual del documento
+  - Carga la valoración previa del usuario si ya valoró el documento
+  - Envía la valoración al servidor y actualiza el documento
+  - Notifica al componente padre cuando se completa la valoración
+-->
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/autenticacion';
 import { ElMessage } from 'element-plus';
 import { Star } from '@element-plus/icons-vue';
-import { obtenerMiValoracion, valorarDocumento } from '@/services/documentService';
+import { obtenerMiValoracion, valorarDocumento } from '@/services/servicioDocumentos';
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -282,34 +299,21 @@ onMounted(() => {
 .rating-dialog :deep(.el-dialog) {
   border-radius: 20px;
   overflow: hidden;
-  animation: dialogSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: cardSlideInBase 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-@keyframes dialogSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
 .rating-dialog :deep(.el-dialog__header) {
   padding: 24px 24px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
-
 .rating-dialog :deep(.el-dialog__title) {
   font-size: 24px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .rating-dialog :deep(.el-dialog__body) {
@@ -484,42 +488,26 @@ onMounted(() => {
 }
 
 .dialog-footer :deep(.el-button) {
-  border-radius: 10px;
-  font-weight: 600;
-  padding: 10px 24px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.dialog-footer :deep(.el-button:hover) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.dialog-footer :deep(.el-button) {
   border-radius: 6px;
   font-weight: 500;
   font-size: 14px;
   padding: 10px 20px;
   border: 1px solid #e5e5e5;
   background: #ffffff;
-  color: #1a1a1a;
-  transition: all 0.2s ease;
+  color: var(--text-primary);
+  transition: var(--transition-base);
 }
-
 .dialog-footer :deep(.el-button:hover) {
   background: #f5f5f5;
   border-color: #d5d5d5;
-  transform: none;
-  box-shadow: none;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
-
 .dialog-footer :deep(.el-button--primary) {
-  background: #1a1a1a;
-  border-color: #1a1a1a;
+  background: var(--text-primary);
+  border-color: var(--text-primary);
   color: #ffffff;
 }
-
 .dialog-footer :deep(.el-button--primary:hover) {
   background: #333333;
   border-color: #333333;

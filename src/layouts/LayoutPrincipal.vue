@@ -96,20 +96,31 @@ webpack compiled with 1 error<template>
     <el-footer class="app-footer">
       <div class="footer-content">
         <p>&copy; 2025 Repositorio de Apuntes. Todos los derechos reservados.</p>
-        <div class="footer-links">
-          <el-link type="primary" @click="goTo('/?tab=terms')">Términos de Uso</el-link>
-          <el-link type="primary" @click="goTo('/?tab=privacy')">Política de Privacidad</el-link>
-          <el-link type="primary" @click="goTo('/?tab=contact')">Contacto</el-link>
-        </div>
       </div>
     </el-footer>
   </div>
 </template>
 
+<!--
+  ============================================
+  LAYOUT: LayoutPrincipal
+  ============================================
+  
+  DESCRIPCIÓN:
+  Layout principal de la aplicación que contiene el header con navegación, el contenido
+  principal (router-view) y el footer. Es el diseño base para todas las vistas protegidas.
+  
+  QUÉ HACE:
+  - Muestra el header con logo, menú de navegación y menú de usuario
+  - Renderiza el contenido principal (router-view) según la ruta activa
+  - Muestra el footer con información de copyright
+  - Permite navegar entre secciones (documentos, subir, perfil, mis documentos)
+  - Permite cerrar sesión desde el menú de usuario
+-->
 <script setup>
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/autenticacion';
 import {
   Document,
   User,
@@ -166,36 +177,25 @@ const handleLogout = () => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #fafafa;
+  background: var(--app-bg);
   position: relative;
   overflow-x: hidden;
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeInUpBase 0.6s ease-out;
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .app-header {
-  background: rgba(255, 255, 255, 0.8);
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text-primary);
   padding: 0;
-  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 0 0 var(--border-color);
   position: sticky;
   top: 0;
   z-index: 1000;
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition-base);
   animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 @keyframes slideDown {
   from {
     transform: translateY(-100%);
@@ -283,11 +283,11 @@ const handleLogout = () => {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.3px;
-  color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
   position: relative;
   z-index: 1;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-base);
 }
 
 .logo-section:hover .app-title {
@@ -302,29 +302,18 @@ const handleLogout = () => {
 }
 
 .nav-menu :deep(.el-menu-item) {
-  color: #666666;
+  color: var(--text-muted);
   border-bottom: 2px solid transparent;
   font-weight: 500;
   font-size: 14px;
   padding: 0 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-base);
   margin: 0 4px;
   border-radius: 8px;
   position: relative;
   height: 72px;
   line-height: 72px;
-  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  animation: fadeInUpBaseSm 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .nav-menu :deep(.el-menu-item:nth-child(1)) {
@@ -347,11 +336,10 @@ const handleLogout = () => {
   transform: translateX(-50%) scaleX(0);
   width: 4px;
   height: 4px;
-  background: #1a1a1a;
+  background: var(--text-primary);
   border-radius: 50%;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-base);
 }
-
 .nav-menu :deep(.el-menu-item::before) {
   content: '';
   position: absolute;
@@ -359,24 +347,21 @@ const handleLogout = () => {
   left: 20px;
   right: 20px;
   height: 2px;
-  background: #1a1a1a;
+  background: var(--text-primary);
   transform: scaleX(0);
   transform-origin: center;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .nav-menu :deep(.el-menu-item:hover) {
   background: rgba(0, 0, 0, 0.04);
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
-
 .nav-menu :deep(.el-menu-item:hover::after) {
   transform: translateX(-50%) scaleX(1);
 }
-
 .nav-menu :deep(.el-menu-item.is-active) {
   background: rgba(0, 0, 0, 0.06);
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -609,41 +594,6 @@ const handleLogout = () => {
   font-weight: 400;
 }
 
-.footer-links {
-  display: flex;
-  gap: 32px;
-}
-
-.footer-links :deep(.el-link) {
-  color: #666666;
-  font-size: 13px;
-  font-weight: 400;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-decoration: none;
-  position: relative;
-  padding: 4px 0;
-}
-
-.footer-links :deep(.el-link::after) {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1.5px;
-  background: #1a1a1a;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.footer-links :deep(.el-link:hover) {
-  color: #1a1a1a;
-  transform: translateY(-1px);
-}
-
-.footer-links :deep(.el-link:hover::after) {
-  width: 100%;
-}
-
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
@@ -676,9 +626,5 @@ const handleLogout = () => {
     text-align: center;
   }
 
-  .footer-links {
-    flex-direction: column;
-    gap: 12px;
-  }
 }
 </style>

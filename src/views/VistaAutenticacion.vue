@@ -1,11 +1,26 @@
+<!--
+  ============================================
+  VISTA: VistaAutenticacion
+  ============================================
+  
+  DESCRIPCIÓN:
+  Vista que muestra el formulario de inicio de sesión y registro de usuarios.
+  Tiene pestañas para alternar entre login y registro.
+  
+  QUÉ HACE:
+  - Muestra el formulario de inicio de sesión (SeccionLogin)
+  - Muestra el formulario de registro (SeccionRegistro)
+  - Permite alternar entre ambos usando pestañas
+  - Sincroniza la pestaña activa con el parámetro ?tab= en la URL
+-->
 <template>
   <div class="auth-view">
     <el-tabs v-model="activeTab" class="auth-tabs" @tab-change="handleTabChange">
       <el-tab-pane label="Iniciar Sesión" name="login">
-        <LoginSection @switch-tab="handleSwitchTab" />
+        <SeccionLogin @switch-tab="handleSwitchTab" />
       </el-tab-pane>
       <el-tab-pane label="Registrarse" name="register">
-        <RegisterSection @switch-tab="handleSwitchTab" />
+        <SeccionRegistro @switch-tab="handleSwitchTab" />
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -14,8 +29,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import LoginSection from '@/components/LoginSection.vue';
-import RegisterSection from '@/components/RegisterSection.vue';
+import SeccionLogin from '@/components/SeccionLogin.vue';
+import SeccionRegistro from '@/components/SeccionRegistro.vue';
 
 const route = useRoute();
 const router = useRouter();

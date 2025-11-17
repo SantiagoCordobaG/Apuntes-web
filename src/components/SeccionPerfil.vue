@@ -143,12 +143,26 @@
   </div>
 </template>
 
+<!--
+  ============================================
+  COMPONENTE: SeccionPerfil
+  ============================================
+  
+  DESCRIPCIÓN:
+  Muestra el perfil del usuario actual con toda su información personal y permite editarlo.
+  
+  QUÉ HACE:
+  - Muestra la información del usuario: nombre, correo, rol, carrera, universidad
+  - Permite editar el perfil (modo edición)
+  - Permite actualizar la información personal
+  - Guarda los cambios en el backend y actualiza el store
+-->
 <script setup>
 import { ref, onMounted } from "vue";
 import { ElButton, ElAvatar, ElMessage, ElInput, ElSelect, ElOption } from "element-plus";
 import { Edit, Check, User, Message, UserFilled, School, OfficeBuilding, InfoFilled } from "@element-plus/icons-vue";
-import { useAuthStore } from "@/stores/auth";
-import { actualizarUsuario } from "@/services/usuarioService";
+import { useAuthStore } from "@/stores/autenticacion";
+import { actualizarUsuario } from "@/services/servicioUsuarios";
 import { useRouter } from "vue-router";
 
 const authStore = useAuthStore();
@@ -174,8 +188,8 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error("Error al cargar el perfil:", error);
-    user.value = authStore.usuario;
-    if (!user.value) {
+    user.value = authStore.usuario || {};
+    if (!user.value._id) {
       ElMessage.error("Error al cargar el perfil");
       router.push("/login");
     }
@@ -228,14 +242,14 @@ const guardarCambios = async () => {
   max-width: 680px;
   padding: 48px;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.3s;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-base);
 }
 .perfil-card:hover {
-  border-color: rgba(0, 0, 0, 0.12);
+  border-color: var(--border-color-strong);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   transform: translateY(-4px);
 }
@@ -281,11 +295,11 @@ const guardarCambios = async () => {
   margin: 0 0 12px 0;
   font-weight: 700;
   font-size: 36px;
-  color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
 }
 .perfil-correo {
-  color: #666666;
+  color: var(--text-muted);
   margin: 0 0 16px 0;
   font-size: 16px;
   display: flex;
@@ -315,11 +329,11 @@ const guardarCambios = async () => {
   font-size: 14px;
   font-weight: 600;
   border-radius: 12px;
-  transition: all 0.3s;
+  transition: var(--transition-base);
 }
 .action-button.primary {
-  background: #1a1a1a;
-  border: 1px solid #1a1a1a;
+  background: var(--text-primary);
+  border: 1px solid var(--text-primary);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -329,14 +343,14 @@ const guardarCambios = async () => {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 .action-button.secondary {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 .action-button.secondary:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.15);
+  background: var(--surface-strong);
+  border-color: var(--border-color-strong);
   transform: translateY(-2px);
 }
 .perfil-details { margin-bottom: 40px; }
@@ -384,8 +398,8 @@ const guardarCambios = async () => {
 .detail-value {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
 }
 .empty-details {
   display: flex;
@@ -416,9 +430,9 @@ const guardarCambios = async () => {
 .form-select :deep(.el-input__wrapper) {
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   backdrop-filter: blur(10px);
-  transition: all 0.3s;
+  transition: var(--transition-base);
 }
 .form-input :deep(.el-input__wrapper:hover),
 .form-select :deep(.el-input__wrapper:hover) {
@@ -427,7 +441,7 @@ const guardarCambios = async () => {
 }
 .form-input :deep(.el-input__wrapper.is-focus),
 .form-select :deep(.el-input__wrapper.is-focus) {
-  border-color: #1a1a1a;
+  border-color: var(--text-primary);
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 

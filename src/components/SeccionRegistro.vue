@@ -1,15 +1,15 @@
 <template>
-  <div class="register-container">
-    <div class="register-card">
-      <div class="register-header">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
         <div class="logo-wrapper">
           <el-icon class="logo-icon"><UserFilled /></el-icon>
         </div>
-        <h1 class="register-title">Crea tu cuenta</h1>
-        <p class="register-subtitle">Únete a nuestra comunidad</p>
+        <h1 class="auth-title">Crea tu cuenta</h1>
+        <p class="auth-subtitle">Únete a nuestra comunidad</p>
       </div>
 
-      <el-form @submit.prevent="handleRegistro" class="register-form">
+      <el-form @submit.prevent="handleRegistro" class="auth-form">
         <el-form-item>
           <el-input
             v-model="nombre"
@@ -112,17 +112,16 @@
           size="large"
           :loading="loading"
           @click="handleRegistro"
-          class="register-button"
+          class="auth-button"
         >
-          <span v-if="!loading">Crear Cuenta</span>
-          <span v-else>Creando cuenta...</span>
+          {{ loading ? 'Creando cuenta...' : 'Crear Cuenta' }}
         </el-button>
       </el-form>
 
-      <div class="register-footer">
+      <div class="auth-footer">
         <p class="footer-text">
           ¿Ya tienes cuenta?
-          <a href="#" @click.prevent="$emit('switch-tab', 'login')" class="login-link">
+          <a href="#" @click.prevent="$emit('switch-tab', 'login')" class="auth-link">
             Inicia sesión aquí
           </a>
         </p>
@@ -131,44 +130,74 @@
   </div>
 </template>
 
+<!--
+  ============================================
+  COMPONENTE: SeccionRegistro
+  ============================================
+  
+  DESCRIPCIÓN:
+  Formulario para que los usuarios creen una nueva cuenta en el sistema.
+  Permite registrar estudiantes y profesores con información personal básica.
+  
+  QUÉ HACE:
+  - Muestra un formulario con campos: nombre, correo, contraseña, rol, carrera, universidad
+  - Valida que los campos obligatorios estén completos
+  - Valida que la contraseña tenga al menos 6 caracteres
+  - Valida que las contraseñas coincidan
+  - Crea el nuevo usuario en el backend
+  - Redirige al área principal después de un registro exitoso
+  - Permite cambiar al formulario de login
+-->
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/autenticacion';
 import { ElMessage } from 'element-plus';
 import { UserFilled, User, Message, Lock, School, OfficeBuilding } from '@element-plus/icons-vue';
 
+// Emitir evento para cambiar al tab de login
 // eslint-disable-next-line no-undef
 defineEmits(['switch-tab']);
 
 const router = useRouter();
 const authStore = useAuthStore();
-const nombre = ref('');
-const correo = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const rol = ref('Estudiante');
-const carrera = ref('');
-const universidad = ref('');
-const loading = ref(false);
-const errorMessage = ref('');
 
+// Estados del formulario
+const nombre = ref(''); // Nombre completo del usuario
+const correo = ref(''); // Correo electrónico
+const password = ref(''); // Contraseña
+const confirmPassword = ref(''); // Confirmación de contraseña
+const rol = ref('Estudiante'); // Rol del usuario (Estudiante o Profesor)
+const carrera = ref(''); // Carrera (opcional)
+const universidad = ref(''); // Universidad (opcional)
+const loading = ref(false); // Muestra spinner mientras se procesa el registro
+const errorMessage = ref(''); // Mensaje de error a mostrar
+
+// Maneja el registro de un nuevo usuario
 const handleRegistro = async () => {
   errorMessage.value = '';
+  
+  // Validar campos obligatorios
   if (!nombre.value || !correo.value || !password.value) {
     errorMessage.value = 'Por favor, completa los campos obligatorios.';
     return;
   }
+  
+  // Validar longitud mínima de contraseña
   if (password.value.length < 6) {
     errorMessage.value = 'La contraseña debe tener al menos 6 caracteres.';
     return;
   }
+  
+  // Validar que las contraseñas coincidan
   if (password.value !== confirmPassword.value) {
     errorMessage.value = 'Las contraseñas no coinciden.';
     return;
   }
+  
   loading.value = true;
   try {
+    // Intentar crear el usuario con el store
     const result = await authStore.registro({
       nombre: nombre.value,
       correo: correo.value,
@@ -177,10 +206,13 @@ const handleRegistro = async () => {
       carrera: carrera.value,
       universidad: universidad.value
     });
+    
     if (result.success) {
+      // Si el registro es exitoso, mostrar mensaje y redirigir a home
       ElMessage.success(`¡Bienvenido, ${authStore.usuario?.nombre}! Tu cuenta ha sido creada exitosamente. 🎉`);
       router.push('/');
     } else {
+      // Si falla, mostrar el mensaje de error
       errorMessage.value = result.message;
     }
   } catch (error) {
@@ -191,97 +223,3 @@ const handleRegistro = async () => {
   }
 };
 </script>
-
-<style scoped>
-.register-container { width: 100%; }
-.register-card { background: transparent; padding: 0; width: 100%; }
-.register-header { text-align: center; margin-bottom: 32px; }
-.logo-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  background: #1a1a1a;
-  border-radius: 14px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s;
-}
-.logo-wrapper:hover { transform: scale(1.05); }
-.logo-icon { font-size: 28px; color: white; }
-.register-title {
-  font-size: 32px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-}
-.register-subtitle { font-size: 15px; color: #666666; margin: 0; }
-.register-form { margin-top: 40px; }
-.register-form :deep(.el-form-item) { margin-bottom: 20px; }
-.custom-input :deep(.el-input__wrapper),
-.custom-select :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s;
-}
-.custom-input :deep(.el-input__wrapper:hover),
-.custom-select :deep(.el-input__wrapper:hover) {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-.custom-input :deep(.el-input__wrapper.is-focus),
-.custom-select :deep(.el-input__wrapper.is-focus) {
-  border-color: #1a1a1a;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
-}
-.custom-select { width: 100%; }
-.error-alert { margin-bottom: 20px; border-radius: 12px; }
-.register-button {
-  width: 100%;
-  height: 52px;
-  font-size: 15px;
-  font-weight: 600;
-  border-radius: 12px;
-  background: #1a1a1a;
-  border: 1px solid #1a1a1a;
-  color: #ffffff;
-  transition: all 0.3s;
-  margin-top: 8px;
-}
-.register-button:hover {
-  background: #333333;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-.register-footer { margin-top: 32px; text-align: center; }
-.footer-text { font-size: 14px; color: #666666; margin: 0; }
-.login-link {
-  color: #1a1a1a;
-  text-decoration: none;
-  font-weight: 600;
-  margin-left: 4px;
-  transition: all 0.3s;
-  position: relative;
-}
-.login-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: #1a1a1a;
-  transition: width 0.3s;
-}
-.login-link:hover::after { width: 100%; }
-@media (max-width: 480px) {
-  .register-title { font-size: 28px; }
-  .logo-wrapper { width: 52px; height: 52px; }
-  .logo-icon { font-size: 24px; }
-  .register-form :deep(.el-form-item) { margin-bottom: 16px; }
-}
-</style>

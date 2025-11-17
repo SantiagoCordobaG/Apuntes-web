@@ -3,11 +3,18 @@
  * CONFIGURACIÓN DE LA API
  * ============================================
  * 
- * Define la URL base de la API y todos los endpoints.
+ * DESCRIPCIÓN:
+ * Define la URL base de la API y todos los endpoints del backend. Centraliza todas
+ * las rutas de la API en un solo lugar para facilitar su mantenimiento.
  * 
- * IMPORTANTE: Vue CLI usa process.env, no import.meta.env
+ * QUÉ HACE:
+ * - Define la URL base del backend (por defecto: http://localhost:3000/api)
+ * - Define todos los endpoints organizados por categoría (AUTH, DOCUMENTOS, USUARIOS)
+ * - Permite cambiar la URL del backend usando variables de entorno
  * 
- * Si quieres cambiar la URL del backend, crea un archivo .env con:
+ * NOTA IMPORTANTE: Vue CLI usa process.env, no import.meta.env
+ * 
+ * Para cambiar la URL del backend, crea un archivo .env en la raíz del proyecto con:
  * VUE_APP_API_URL=http://tu-servidor.com
  */
 

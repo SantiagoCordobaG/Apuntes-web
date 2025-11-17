@@ -3,21 +3,29 @@
  * CONFIGURACIÓN DE RUTAS (ROUTER)
  * ============================================
  * 
- * Define TODAS las rutas de la aplicación y protege las que requieren autenticación.
+ * DESCRIPCIÓN:
+ * Define todas las rutas de la aplicación y protege las que requieren autenticación.
+ * Gestiona la navegación entre diferentes vistas y verifica permisos de acceso.
+ * 
+ * QUÉ HACE:
+ * - Define las rutas públicas (login, registro) y protegidas (área principal)
+ * - Verifica si el usuario está autenticado antes de permitir acceso a rutas protegidas
+ * - Redirige a login si el usuario intenta acceder a rutas protegidas sin estar autenticado
+ * - Redirige a home si un usuario autenticado intenta acceder a login/registro
  * 
  * RUTAS PÚBLICAS (cualquiera puede acceder):
- * - /login → AuthView (pantalla de login)
- * - /registro → AuthView (pantalla de registro)
+ * - /login → VistaAutenticacion (pantalla de login)
+ * - /registro → VistaAutenticacion (pantalla de registro)
  * 
  * RUTAS PROTEGIDAS (requieren estar logueado):
- * - / → MainLayout + HomeView (área principal de la app)
+ * - / → LayoutPrincipal + VistaInicio (área principal de la app)
  */
 
 import { createRouter, createWebHistory } from "vue-router";
-import MainLayout from "@/layouts/MainLayout.vue";
-import HomeView from "@/views/HomeView.vue";
-import AuthView from "@/views/AuthView.vue";
-import { useAuthStore } from "@/stores/auth";
+import LayoutPrincipal from "@/layouts/LayoutPrincipal.vue";
+import VistaInicio from "@/views/VistaInicio.vue";
+import VistaAutenticacion from "@/views/VistaAutenticacion.vue";
+import { useAuthStore } from "@/stores/autenticacion";
 
 // Definir todas las rutas de la aplicación
 const routes = [
@@ -26,13 +34,13 @@ const routes = [
   {
     path: "/login",
     name: "Login",
-    component: AuthView, // Muestra AuthView con tab de login
+    component: VistaAutenticacion, // Muestra VistaAutenticacion con tab de login
     meta: { requiresAuth: false } // No requiere autenticación
   },
   {
     path: "/registro",
     name: "Registro",
-    component: AuthView, // Muestra AuthView con tab de registro
+    component: VistaAutenticacion, // Muestra VistaAutenticacion con tab de registro
     meta: { requiresAuth: false } // No requiere autenticación
   },
   
@@ -40,13 +48,13 @@ const routes = [
   // Estas rutas SÍ requieren autenticación
   {
     path: "/",
-    component: MainLayout, // Layout con header y footer
+    component: LayoutPrincipal, // Layout con header y footer
     meta: { requiresAuth: true }, // REQUIERE autenticación
     children: [
       {
         path: "", // Ruta vacía = ruta raíz
         name: "Home",
-        component: HomeView, // Vista principal (muestra componentes según ?tab=)
+        component: VistaInicio, // Vista principal (muestra componentes según ?tab=)
       },
     ],
   },

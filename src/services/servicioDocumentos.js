@@ -3,45 +3,36 @@
  * SERVICIO DE DOCUMENTOS
  * ============================================
  * 
- * Centraliza TODAS las operaciones relacionadas con documentos.
+ * DESCRIPCIÓN:
+ * Centraliza todas las operaciones relacionadas con documentos. Todas estas funciones
+ * hacen peticiones HTTP al backend para gestionar documentos.
  * 
- * VENTAJAS:
- * - Evita repetir código
- * - Maneja errores de forma consistente
- * - El token se agrega automáticamente (gracias a axios interceptor)
+ * QUÉ HACE:
+ * - Obtiene todos los documentos o un documento específico por ID
+ * - Sube nuevos documentos al servidor
+ * - Descarga documentos del servidor
+ * - Permite valorar documentos con estrellas y comentarios
+ * - Permite eliminar documentos (solo el propietario)
  * 
- * FUNCIONES:
- * - obtenerDocumentos(): Obtiene todos los documentos
- * - obtenerDocumentoPorId(): Obtiene un documento específico
- * - subirDocumento(): Sube un nuevo documento
- * - descargarDocumento(): Descarga un documento
- * - valorarDocumento(): Valora un documento
- * - obtenerMiValoracion(): Obtiene la valoración del usuario actual
- * - eliminarDocumento(): Elimina un documento
+ * NOTA: El token JWT se agrega automáticamente en todas las peticiones gracias al
+ * interceptor de axios configurado en @/utils/axios.js
  */
 
 import apiClient from '@/utils/axios';
 import { ENDPOINTS } from '@/config/api';
 
-/**
- * Obtiene todos los documentos disponibles
- * @returns {Promise<Array>} Lista de documentos
- */
+// Obtiene todos los documentos disponibles en el sistema
 export async function obtenerDocumentos() {
   try {
     const response = await apiClient.get(ENDPOINTS.DOCUMENTOS.BASE);
     return response.data;
   } catch (error) {
     console.error('Error al obtener documentos:', error);
-    throw error; // El interceptor de axios ya mostró el mensaje de error
+    throw error;
   }
 }
 
-/**
- * Obtener un documento por ID
- * @param {string} id - ID del documento
- * @returns {Promise<Object>} Documento
- */
+// Obtiene un documento específico por su ID
 export async function obtenerDocumentoPorId(id) {
   try {
     const response = await apiClient.get(ENDPOINTS.DOCUMENTOS.BY_ID(id));
@@ -52,17 +43,12 @@ export async function obtenerDocumentoPorId(id) {
   }
 }
 
-/**
- * Subir un nuevo documento
- * @param {FormData} formData - FormData con el archivo y datos del documento
- * @returns {Promise<Object>} Documento subido
- */
+// Sube un nuevo documento al servidor
+// formData: contiene el archivo y toda la información del documento
 export async function subirDocumento(formData) {
   try {
     const response = await apiClient.post(ENDPOINTS.DOCUMENTOS.UPLOAD, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   } catch (error) {
@@ -71,15 +57,12 @@ export async function subirDocumento(formData) {
   }
 }
 
-/**
- * Descargar un documento
- * @param {string} id - ID del documento
- * @returns {Promise<Blob>} Archivo como Blob
- */
+// Descarga un documento del servidor
+// Retorna el archivo como Blob (para poder descargarlo)
 export async function descargarDocumento(id) {
   try {
     const response = await apiClient.get(ENDPOINTS.DOCUMENTOS.DOWNLOAD(id), {
-      responseType: 'blob' // Importante para descargar archivos
+      responseType: 'blob' // Importante: permite descargar archivos
     });
     return response.data;
   } catch (error) {
@@ -88,13 +71,10 @@ export async function descargarDocumento(id) {
   }
 }
 
-/**
- * Valorar un documento
- * @param {string} documentId - ID del documento
- * @param {number} rating - Valoración (1-5)
- * @param {string} comentario - Comentario opcional
- * @returns {Promise<Object>} Respuesta con el documento actualizado
- */
+// Valora un documento (rating de 1 a 5 estrellas)
+// documentId: ID del documento a valorar
+// rating: número de estrellas (1-5)
+// comentario: comentario opcional
 export async function valorarDocumento(documentId, rating, comentario = '') {
   try {
     const response = await apiClient.post(ENDPOINTS.DOCUMENTOS.RATE(documentId), {
@@ -108,18 +88,15 @@ export async function valorarDocumento(documentId, rating, comentario = '') {
   }
 }
 
-/**
- * Obtener la valoración del usuario actual para un documento
- * @param {string} documentId - ID del documento
- * @returns {Promise<Object>} Valoración del usuario o null si no ha valorado
- */
+// Obtiene la valoración que el usuario actual hizo de un documento
+// Si el usuario no ha valorado, retorna { hasRated: false }
 export async function obtenerMiValoracion(documentId) {
   try {
     const response = await apiClient.get(ENDPOINTS.DOCUMENTOS.MY_RATING(documentId));
     return response.data;
   } catch (error) {
-    // Si el error es 404, significa que el usuario no ha valorado aún
-    if (error.response && error.response.status === 404) {
+    // Si el error es 404, el usuario no ha valorado aún
+    if (error.response?.status === 404) {
       return { hasRated: false };
     }
     console.error('Error al obtener valoración:', error);
@@ -127,11 +104,7 @@ export async function obtenerMiValoracion(documentId) {
   }
 }
 
-/**
- * Eliminar un documento (solo el propietario)
- * @param {string} id - ID del documento
- * @returns {Promise<Object>} Respuesta de confirmación
- */
+// Elimina un documento (solo el propietario puede eliminarlo)
 export async function eliminarDocumento(id) {
   try {
     const response = await apiClient.delete(ENDPOINTS.DOCUMENTOS.BY_ID(id));
