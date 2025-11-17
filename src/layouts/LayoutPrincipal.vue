@@ -1,32 +1,4 @@
 
-ERROR  Failed to compile with 1 error                                                               12:35:56 PM
-
-[eslint]
-C:\Users\Administrator\Documents\webanthonydev\Apuntes-web\src\views\PerfilView.vue
-  148:10   error  'ElCard' is defined but never used              no-unused-vars
-  148:28   error  'ElDivider' is defined but never used           no-unused-vars
-  148:39   error  'ElDescriptions' is defined but never used      no-unused-vars
-  148:55   error  'ElDescriptionsItem' is defined but never used  no-unused-vars
-  148:96   error  'ElForm' is defined but never used              no-unused-vars
-  148:104  error  'ElFormItem' is defined but never used          no-unused-vars
-
-✖ 6 problems (6 errors, 0 warnings)
-
-
-You may use special comments to disable some warnings.
-Use // eslint-disable-next-line to ignore the next line.
-Use /* eslint-disable */ to ignore all warnings in a file.
-ERROR in [eslint]
-C:\Users\Administrator\Documents\webanthonydev\Apuntes-web\src\views\PerfilView.vue
-  148:10   error  'ElCard' is defined but never used              no-unused-vars
-  148:28   error  'ElDivider' is defined but never used           no-unused-vars
-  148:39   error  'ElDescriptions' is defined but never used      no-unused-vars
-  148:55   error  'ElDescriptionsItem' is defined but never used  no-unused-vars
-  148:96   error  'ElForm' is defined but never used              no-unused-vars
-  148:104  error  'ElFormItem' is defined but never used          no-unused-vars
-
-✖ 6 problems (6 errors, 0 warnings)
-
 
 webpack compiled with 1 error<template>
   <div class="app-layout">
