@@ -138,19 +138,6 @@
           </div>
         </el-form-item>
 
-        <!-- Privacidad -->
-        <el-form-item label="Visibilidad">
-          <el-radio-group v-model="form.visibility">
-            <el-radio value="public">Público</el-radio>
-            <el-radio value="private">Privado</el-radio>
-          </el-radio-group>
-          <div class="visibility-help">
-            <el-text type="info" size="small">
-              Los documentos privados solo serán visibles para ti
-            </el-text>
-          </div>
-        </el-form-item>
-
         <!-- Botones de acción -->
         <el-form-item>
           <div class="form-actions">
@@ -213,10 +200,8 @@
   - Permite seleccionar y subir archivos PDF, DOC o DOCX (máx. 10MB)
   - Permite agregar título, descripción, autor y etiquetas al documento
   - Genera etiquetas automáticas basándose en el nombre del archivo
-  - Permite configurar la visibilidad (público o privado)
   - Valida el archivo antes de subirlo (tipo y tamaño)
   - Sube el documento al servidor y muestra confirmación
-  - Notifica al componente padre cuando se sube un documento exitosamente
 -->
 <script setup>
 import { ref, reactive, nextTick, onMounted, watch } from 'vue';
@@ -226,10 +211,6 @@ import { ElMessage } from 'element-plus';
 import { Upload, UploadFilled, Document } from '@element-plus/icons-vue';
 import { subirDocumento } from '@/services/servicioDocumentos';
 import { generarEtiquetasAutomaticas } from '@/services/servicioEtiquetadoAutomatico';
-
-// Emitir evento cuando se sube un documento (para notificar al componente padre)
-// eslint-disable-next-line no-undef
-const emit = defineEmits(['document-uploaded']);
 
 // Stores para acceder a datos globales
 const documentsStore = useDocumentsStore();
@@ -248,7 +229,6 @@ const form = reactive({
   author: '', // Autor del documento/libro
   tags: [], // Lista de etiquetas
   autoTagging: true, // Activar/desactivar etiquetas automáticas
-  visibility: 'public', // 'public' o 'private'
   file: null, // Archivo seleccionado
   fileType: '' // Tipo: 'pdf' o 'docx'
 });
@@ -396,7 +376,6 @@ const resetForm = () => {
     author: '',
     tags: [],
     autoTagging: true,
-    visibility: 'public',
     file: null,
     fileType: ''
   });
@@ -431,7 +410,6 @@ const submitForm = async () => {
     formData.append('usuario', form.usuario);
     formData.append('author', form.author || 'Anónimo');
     formData.append('tags', JSON.stringify(form.tags));
-    formData.append('visibility', form.visibility);
     
     // Subir el documento al servidor
     const data = await subirDocumento(formData);
@@ -451,9 +429,9 @@ const submitForm = async () => {
     
     ElMessage.success('Documento subido exitosamente');
     resetForm();
-    emit('document-uploaded'); // Notifica al componente padre
   } catch (error) {
     console.error('Error al subir documento:', error);
+    ElMessage.error('Error al subir el documento. Por favor intenta nuevamente.');
   } finally {
     uploading.value = false;
   }

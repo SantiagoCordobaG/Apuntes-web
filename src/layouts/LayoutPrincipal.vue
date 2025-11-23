@@ -44,10 +44,6 @@ webpack compiled with 1 error<template>
                   <el-icon class="dropdown-item-icon"><User /></el-icon>
                   <span>Mi Perfil</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click="goTo('/?tab=mydocuments')" class="dropdown-item">
-                  <el-icon class="dropdown-item-icon"><Document /></el-icon>
-                  <span>Mis Documentos</span>
-                </el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout" class="dropdown-item logout-item">
                   <el-icon class="dropdown-item-icon"><Switch /></el-icon>
                   <span>Cerrar Sesión</span>
@@ -86,7 +82,7 @@ webpack compiled with 1 error<template>
   - Muestra el header con logo, menú de navegación y menú de usuario
   - Renderiza el contenido principal (router-view) según la ruta activa
   - Muestra el footer con información de copyright
-  - Permite navegar entre secciones (documentos, subir, perfil, mis documentos)
+  - Permite navegar entre secciones (documentos, subir, perfil)
   - Permite cerrar sesión desde el menú de usuario
 -->
 <script setup>
