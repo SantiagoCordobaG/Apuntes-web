@@ -126,7 +126,6 @@
           </div>
           <div class="document-actions">
             <el-button type="primary" @click="descargarDocumentoHandler(doc)"><el-icon><Download /></el-icon> Descargar</el-button>
-            <el-button @click="verDetalles(doc._id)"><el-icon><View /></el-icon> Ver Detalles</el-button>
             <el-button type="warning" @click="abrirDialogoValoracion(doc)"><el-icon><Star /></el-icon> Valorar</el-button>
           </div>
         </el-card>
@@ -139,23 +138,6 @@
       :document="documentoParaValorar"
       @rated="handleRatingSubmitted"
     />
-
-    <!-- Diálogo de detalles del documento -->
-    <el-dialog v-model="dialogVisible" title="Detalles del Documento" width="600px">
-      <el-descriptions v-if="documentoSeleccionado" :column="1" border>
-        <el-descriptions-item label="Título">{{ documentoSeleccionado.title }}</el-descriptions-item>
-        <el-descriptions-item label="Descripción">{{ documentoSeleccionado.description }}</el-descriptions-item>
-        <el-descriptions-item label="Autor">{{ documentoSeleccionado.author }}</el-descriptions-item>
-        <el-descriptions-item label="Tipo">{{ documentoSeleccionado.fileType?.toUpperCase() }}</el-descriptions-item>
-        <el-descriptions-item label="Tamaño">{{ documentoSeleccionado.fileSize }}</el-descriptions-item>
-        <el-descriptions-item label="Fecha de subida">{{ formatearFecha(documentoSeleccionado.uploadDate) }}</el-descriptions-item>
-        <el-descriptions-item label="Valoración"><el-rate v-model="documentoSeleccionado.rating" disabled show-score /></el-descriptions-item>
-        <el-descriptions-item label="Descargas">{{ documentoSeleccionado.downloadCount || 0 }}</el-descriptions-item>
-        <el-descriptions-item label="Etiquetas">
-          <el-tag v-for="tag in documentoSeleccionado.tags" :key="tag" size="small" style="margin-right: 5px">{{ tag }}</el-tag>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-dialog>
   </div>
 </template>
 
@@ -175,21 +157,18 @@
   - Ordena por fecha, título, valoración o número de descargas
   - Permite descargar documentos
   - Permite valorar documentos con estrellas y comentarios
-  - Muestra detalles completos de cada documento
 -->
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Document, Download, View, Search, Refresh, Star } from '@element-plus/icons-vue';
+import { Document, Download, Search, Refresh, Star } from '@element-plus/icons-vue';
 import DialogoValoracion from './DialogoValoracion.vue';
-import { obtenerDocumentos, obtenerDocumentoPorId, descargarDocumento } from '@/services/servicioDocumentos';
+import { obtenerDocumentos, descargarDocumento } from '@/services/servicioDocumentos';
 
 // ===== ESTADOS (datos reactivos que cambian y actualizan la vista) =====
 const documentos = ref([]); // Lista completa de documentos del servidor
 const documentosFiltrados = ref([]); // Documentos después de aplicar filtros y búsqueda
 const loading = ref(false); // true = muestra spinner de carga
-const dialogVisible = ref(false); // true = muestra diálogo de detalles
-const documentoSeleccionado = ref(null); // Documento seleccionado para ver detalles
 const activeCollapse = ref([]); // Controla qué secciones de filtros están abiertas
 const ratingDialogVisible = ref(false); // true = muestra diálogo de valoración
 const documentoParaValorar = ref(null); // Documento que el usuario quiere valorar
@@ -281,16 +260,6 @@ const aplicarFiltros = () => {
 const limpiarFiltros = () => {
   Object.assign(searchForm.value, { query: '', sortBy: 'uploadDate', fileType: 'all', authors: [], selectedTags: [], minRating: 0, minDownloads: 0 });
   aplicarFiltros();
-};
-
-// Muestra el diálogo con todos los detalles del documento seleccionado
-const verDetalles = async (id) => {
-  try {
-    documentoSeleccionado.value = await obtenerDocumentoPorId(id);
-    dialogVisible.value = true;
-  } catch (err) {
-    console.error("Error al cargar detalles:", err);
-  }
 };
 
 // Descarga un documento del servidor y lo guarda en el dispositivo del usuario
