@@ -46,12 +46,12 @@ apiClient.interceptors.request.use(
   (config) => {
     // Obtener el token del localStorage
     const token = localStorage.getItem('token');
-    
+
     // Si hay token, agregarlo al header
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config; // Continuar con la petición
   },
   (error) => {
@@ -68,54 +68,54 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   // Si la respuesta es exitosa → devolverla tal cual
   (response) => response,
-  
+
   // Si hay un error → manejarlo
   (error) => {
     if (error.response) {
       // El servidor respondió con un error
       const { status, data } = error.response;
-      
+
       // ===== ERROR 401: Token inválido o expirado =====
       if (status === 401) {
         // Limpiar datos de autenticación
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
-        
+
         // Solo mostrar mensaje si no estamos en login
         if (!window.location.pathname.includes('/login')) {
           ElMessage.warning('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
           window.location.href = '/login'; // Redirigir a login
         }
-      } 
+      }
       // ===== ERROR 403: Sin permisos =====
       else if (status === 403) {
         ElMessage.error('No tienes permisos para realizar esta acción');
-      } 
+      }
       // ===== ERROR 404: No encontrado =====
       else if (status === 404) {
         ElMessage.error('Recurso no encontrado');
-      } 
+      }
       // ===== ERROR 500+: Error del servidor =====
       else if (status >= 500) {
         ElMessage.error('Error del servidor. Por favor intenta más tarde');
-      } 
-      // ===== OTROS ERRORES =====
-      else if (data && data.error) {
-        ElMessage.error(data.error); // Mostrar mensaje del servidor
-      } else {
-        ElMessage.error('Ocurrió un error inesperado');
       }
-    } 
+      // ===== OTROS ERRORES =====
+      else if (data && (data.error || data.message)) {
+        ElMessage.error(data.error || data.message); // Mostrar mensaje del servidor
+      } else {
+        ElMessage.error('Ocurrió un error inesperado: ' + status);
+      }
+    }
     // ===== ERROR DE RED =====
     // El servidor no respondió (no está corriendo, sin internet, etc.)
     else if (error.request) {
       ElMessage.error('No se pudo conectar con el servidor. Verifica tu conexión o que el backend esté corriendo.');
-    } 
+    }
     // ===== ERROR AL CONFIGURAR LA PETICIÓN =====
     else {
       ElMessage.error('Error al procesar la solicitud');
     }
-    
+
     return Promise.reject(error);
   }
 );
