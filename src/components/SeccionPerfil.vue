@@ -129,3 +129,16 @@ const guardarCambios = async () => {
   }
 };
 </script>
+
+
+<!--
+Frontend (SeccionPerfil.vue - Vista):
+  <div v-if="user.biografia" class="detail-item">
+    <div class="detail-icon"><el-icon><InfoFilled /></el-icon></div>
+    <div class="detail-content"><span class="detail-label">Biografía</span><span class="detail-value">{{ user.biografia }}</span></div>
+  </div>
+
+  Frontend (SeccionPerfil.vue - Edición):
+  <el-input v-model="userEdit.biografia" type="textarea" placeholder="Cuéntanos algo sobre ti..." />
+
+  -->
