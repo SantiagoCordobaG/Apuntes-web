@@ -62,7 +62,15 @@ const handleRegistro = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    await authStore.registro(nombre.value, correo.value, password.value, rol.value, carrera.value, universidad.value);
+    const usuarioData = {
+      nombre: nombre.value,
+      correo: correo.value,
+      password: password.value,
+      rol: rol.value,
+      carrera: carrera.value,
+      universidad: universidad.value
+    };
+    await authStore.registro(usuarioData);
     ElMessage.success('¡Cuenta creada exitosamente!');
     router.push('/');
   } catch (error) {
