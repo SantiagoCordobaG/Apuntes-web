@@ -4,7 +4,8 @@ const UsuarioSchema = new mongoose.Schema({
   nombre: {
     type: String,
     required: [true, "El nombre es obligatorio"],
-    trim: true
+    trim: true,
+    match: [/^[a-zA-ZÀ-ÿ\s]+$/, "El nombre solo puede contener letras"]
   },
   correo: {
     type: String,
@@ -44,4 +45,3 @@ const UsuarioSchema = new mongoose.Schema({
 const Usuario = mongoose.model("Usuario", UsuarioSchema);
 
 export default Usuario;
-

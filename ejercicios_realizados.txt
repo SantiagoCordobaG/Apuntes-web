@@ -1,0 +1,96 @@
+RESUMEN DE EJERCICIOS Y SOLUCIONES
+
+1. AGREGAR BIOGRAFÍA (Backend y Frontend)
+-----------------------------------------
+Backend (models/Usuario.js):
+  biografia: { type: String, default: "" }
+
+Frontend (SeccionPerfil.vue - Vista):
+  <div v-if="user.biografia" class="detail-item">
+    <div class="detail-icon"><el-icon><InfoFilled /></el-icon></div>
+    <div class="detail-content"><span class="detail-label">Biografía</span><span class="detail-value">{{ user.biografia }}</span></div>
+  </div>
+
+Frontend (SeccionPerfil.vue - Edición):
+  <el-input v-model="userEdit.biografia" type="textarea" placeholder="Cuéntanos algo sobre ti..." />
+
+
+2. AGREGAR CIUDAD (Registro y Perfil)
+-------------------------------------
+Backend (models/Usuario.js):
+  ciudad: { type: String, trim: true }
+
+Frontend (SeccionRegistro.vue):
+  // Script
+  const ciudad = ref('');
+  // Template
+  <el-form-item><el-input v-model="ciudad" placeholder="Ciudad" ... /></el-form-item>
+  // En el envío
+  const usuarioData = { ..., ciudad: ciudad.value };
+
+Frontend (SeccionPerfil.vue):
+  // Vista
+  <div v-if="user.ciudad" ...>{{ user.ciudad }}</div>
+  // Edición
+  <el-input v-model="userEdit.ciudad" placeholder="Tu ciudad" />
+
+
+3. RECORDAR CORREO (Login + LocalStorage)
+-----------------------------------------
+Frontend (SeccionLogin.vue):
+  // Script
+  import { onMounted } from 'vue';
+  const recuerdame = ref(false);
+
+  onMounted(() => {
+    const guardado = localStorage.getItem('correoguardado');
+    if (guardado) { correo.value = guardado; recuerdame.value = true; }
+  });
+
+  // En handleLogin (tras éxito)
+  if (recuerdame.value) localStorage.setItem('correoguardado', correo.value);
+  else localStorage.removeItem('correoguardado');
+
+  // Template
+  <el-checkbox v-model="recuerdame">Recordar mi correo</el-checkbox>
+
+
+4. MENSAJES DIVERTIDOS AL DESCARGAR
+-----------------------------------
+Frontend (ListaDocumentos.vue):
+  // En descargarDocumentoHandler
+  const frases = ["¡A estudiar! 🤓", "¡Buena elección! 🚀", "Descargando sabiduría... 🧠"];
+  const frase = frases[Math.floor(Math.random() * frases.length)];
+  
+  ElMessage.success(`${frase} - Descargando ${doc.title}`);
+
+
+5. BLOQUEO DE LOGIN (Seguridad)
+-------------------------------
+Frontend (SeccionLogin.vue):
+  // Script
+  const intentos = ref(0);
+  
+  // En el catch del login
+  intentos.value++;
+  
+  // Template (Botón)
+  <el-button :disabled="intentos >= 3" ...>
+    {{ intentos >= 3 ? 'Bloqueado' : 'Iniciar Sesión' }}
+  </el-button>
+
+
+6. TÉRMINOS Y CONDICIONES (Registro)
+------------------------------------
+Frontend (SeccionRegistro.vue):
+  // Script
+  const aceptaTerminos = ref(false);
+
+  // Validación antes de enviar
+  if (!aceptaTerminos.value) {
+    errorMessage.value = 'Debes aceptar los términos y condiciones';
+    return;
+  }
+
+  // Template
+  <el-checkbox v-model="aceptaTerminos">Acepto los términos y condiciones</el-checkbox>

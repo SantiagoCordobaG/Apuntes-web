@@ -13,8 +13,9 @@
         <el-form-item>
           <el-input v-model="password" type="password" placeholder="Contraseña" size="large" :prefix-icon="Lock" show-password :disabled="loading" class="custom-input" @keyup.enter="handleLogin" />
         </el-form-item>
+      
         <el-alert v-if="errorMessage" :title="errorMessage" type="error" :closable="false" show-icon class="error-alert" />
-        <el-button type="primary" size="large" :loading="loading" @click="handleLogin" class="auth-button">{{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}</el-button>
+        <el-button type="primary" size="large" :loading="loading"  @click="handleLogin" class="auth-button">{{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}</el-button>
       </el-form>
       <div class="auth-footer">
         <p class="footer-text">¿No tienes cuenta? <a href="#" @click.prevent="$emit('switch-tab', 'register')" class="auth-link">Regístrate aquí</a></p>
@@ -40,6 +41,7 @@ const password = ref('');
 const loading = ref(false);
 const errorMessage = ref('');
 
+
 const handleLogin = async () => {
   if (!correo.value || !password.value) {
     errorMessage.value = 'Por favor completa todos los campos';
@@ -48,11 +50,16 @@ const handleLogin = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    await authStore.login(correo.value, password.value);
-    ElMessage.success('¡Bienvenido!');
-    router.push('/');
+    const response = await authStore.login(correo.value, password.value);
+    
+    if (response.success) {
+      ElMessage.success('¡Bienvenido!');
+      router.push('/');
+    } else {
+      errorMessage.value = response.message;
+    }
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Error al iniciar sesión';
+    errorMessage.value = 'Error inesperado al iniciar sesión';
   } finally {
     loading.value = false;
   }

@@ -51,6 +51,13 @@ const handleRegistro = async () => {
     errorMessage.value = 'Por favor completa todos los campos obligatorios';
     return;
   }
+  
+  const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
+  if (!nameRegex.test(nombre.value)) {
+    errorMessage.value = 'El nombre solo debe contener letras';
+    return;
+  }
+
   if (password.value.length < 6) {
     errorMessage.value = 'La contraseña debe tener al menos 6 caracteres';
     return;
@@ -62,11 +69,23 @@ const handleRegistro = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    await authStore.registro(nombre.value, correo.value, password.value, rol.value, carrera.value, universidad.value);
-    ElMessage.success('¡Cuenta creada exitosamente!');
-    router.push('/');
+    const response = await authStore.registro({
+      nombre: nombre.value,
+      correo: correo.value,
+      password: password.value,
+      rol: rol.value,
+      carrera: carrera.value,
+      universidad: universidad.value
+    });
+    
+    if (response.success) {
+      ElMessage.success('¡Cuenta creada exitosamente!');
+      router.push('/');
+    } else {
+      errorMessage.value = response.message;
+    }
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Error al crear la cuenta';
+    errorMessage.value = 'Error inesperado al crear la cuenta';
   } finally {
     loading.value = false;
   }
