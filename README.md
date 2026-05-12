@@ -16,6 +16,13 @@ Aplicación web de gestión de documentos con autenticación de usuarios, subida
 - `src/stores/`: gestión de estado con Pinia.
 - `src/router/`: rutas de la aplicación.
 
+
+  <img src="https://raw.githubusercontent.com/SantiagoCordobaG/Apuntes-web/main/InicioDeSesion.png" alt="Banner de SantiDev" width="100%">
+  <img src="https://raw.githubusercontent.com/SantiagoCordobaG/Apuntes-web/main/Registro.png" alt="Banner de SantiDev" width="100%">
+  <img src="https://raw.githubusercontent.com/SantiagoCordobaG/Apuntes-web/main/Principal.png" alt="Banner de SantiDev" width="100%">
+  <img src="https://raw.githubusercontent.com/SantiagoCordobaG/Apuntes-web/main/SubirDocumento.png" alt="Banner de SantiDev" width="100%">
+  <img src="https://raw.githubusercontent.com/SantiagoCordobaG/Apuntes-web/main/Usuario.png" alt="Banner de SantiDev" width="100%">
+
 ## Project setup
 ```
 npm install
